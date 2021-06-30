@@ -19,3 +19,14 @@ function compareFloat (a, b, epsilon=0.00001) {
 
   return true
 }
+
+
+// ----------------------------------------------
+
+/* Trick from here to round floats:
+    stackoverflow.com/a/12830454
+*/
+function roundAtMost (x, maxPrecision) {
+  return +(x.toFixed(maxPrecision));
+}
+

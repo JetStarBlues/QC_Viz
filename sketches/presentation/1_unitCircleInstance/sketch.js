@@ -1,12 +1,9 @@
-// By @acedean
-//  https://editor.p5js.org/acedean/sketches/aD7k7SVRC
-
 /* Visual design inspired by
     https://kynd.github.io/p5sketches/index.html
 */
 
 /* Notes:
-    
+
     - The p5 coordinate system is such that
       "y increases downwards".
       However, we are attempting to plot the cartesian
@@ -125,7 +122,7 @@ let sketch = function (p) {
     pLabelColor = p.color(108, 91, 123);
     pLabelHighlightColor = p.color(0);
 
-    projectionXColor = p.color(0);  
+    projectionXColor = p.color(0);
     projectionYColor = p.color(0);
 
     gridColor = p.color(0, 30);
@@ -168,7 +165,7 @@ let sketch = function (p) {
     let distanceToP = p.sq(p.mouseX - px) + p.sq(p.mouseY - py);
 
     if (distanceToP <= closeEnough) {
-      pIsHovered = true;    
+      pIsHovered = true;
     }
     else {
       pIsHovered = false;
@@ -389,7 +386,7 @@ let sketch = function (p) {
 
   // ----------------------------------------------
 
-  p.draw = function () {  
+  p.draw = function () {
     // console.log(p.frameCount);
 
     p.background(bgColor);

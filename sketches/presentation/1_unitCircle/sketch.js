@@ -1,13 +1,10 @@
-// By @acedean
-//  https://editor.p5js.org/acedean/sketches/gPKxIWjtA
-
 /* Visual design inspired by
     https://kynd.github.io/p5sketches/index.html
 */
 
 /* Notes:
     - Anything using `elt` is undocumented behaviour
-    
+
     - The p5 coordinate system is such that
       "y increases downwards".
       However, we are attempting to plot the cartesian
@@ -22,10 +19,10 @@
       spinoff due to the fact that ux on its own
       is not enough to determine theta and uy.
       Ditto uy.
-      
+
       In spinoff, only the theta slider will be present.
       Alternatively, no dom at all =(
-      
+
     - will get it to final polish first, before
       doing so (so that dom absence only difference)
 */
@@ -99,7 +96,7 @@ let bgColor;
 function setup () {
   // canvas = createCanvas(500, 400);
   canvas = createCanvas(max(500, windowWidth), 400);
-  
+
   // Add event listeners
   canvas.mouseMoved(canvas_mouseMovedHandler);
   canvas.mousePressed(canvas_mousePressedHandler);
@@ -108,21 +105,21 @@ function setup () {
      https://github.com/processing/p5.js/issues/1967
   */
   // canvas.mouseDragged(canvas_mouseDraggedHandler);
-  
+
   //
   cx = width / 2;
   cy = height / 2;
-  
+
   circleW = 180;
   circleR = circleW / 2;
   circleQ = circleR / 2;
 
   //
   setupDOMControls();
-  
+
   //
   initColors();
-  
+
   //
   textFont("monospace");
 
@@ -142,14 +139,14 @@ function initColors () {
      - www.colourlovers.com/palette/1283145/The_Way_You_Love_Me
   */
   bgColor = color(255,234,173);
-  
+
   pColor = color(0);
   pColorHovered = color(246,114,128);
-  
+
   pLabelColor = color(108,91,123);
   pLabelHighlightColor = color(0);
-  
-  projectionXColor = color(0);  
+
+  projectionXColor = color(0);
   projectionYColor = color(0);
 
   gridColor = color(0,100);
@@ -163,7 +160,7 @@ function initColors () {
 function setupDOMControls () {
   /* Using DOM elements instead of rolling own
      canvas solution.
-     
+
      Using combination of vanillaJS and p5
      to manipulate.
   */
@@ -178,7 +175,7 @@ function setupDOMControls () {
   uySliderLabel = createSpan("uy");
   uySlider = createSlider(-1, 1, 0, 0.01);
   uyInput = createInput("0");
-  
+
   uxControlsContainer.elt.appendChild(uxSliderLabel.elt);
   uxControlsContainer.elt.appendChild(uxSlider.elt);
   uxControlsContainer.elt.appendChild(uxInput.elt);
@@ -186,17 +183,17 @@ function setupDOMControls () {
   uyControlsContainer.elt.appendChild(uySliderLabel.elt);
   uyControlsContainer.elt.appendChild(uySlider.elt);
   uyControlsContainer.elt.appendChild(uyInput.elt);
-  
+
   domControlsContainer.elt.appendChild(uxControlsContainer.elt);
   domControlsContainer.elt.appendChild(uyControlsContainer.elt);
-  
+
   // domControlsContainer.style("border", "2px solid blue");
   domControlsContainer.style("font-family", "monospace");
   domControlsContainer.style("font-size", "12px");
   domControlsContainer.style("display", "inline-flex");
   domControlsContainer.style("flex-wrap", "wrap");
   domControlsContainer.style("flex-direction", "column");
-  
+
   {
     // uxControlsContainer.style("background", "red");
     uxControlsContainer.style("padding", "3px");
@@ -204,7 +201,7 @@ function setupDOMControls () {
     uxControlsContainer.style("alignItems", "center");
 
     uxSliderLabel.style("marginRight", "3px");
-    
+
     uxSlider.style("width", "150px");
     uxSlider.style("marginRight", "5px");
 
@@ -220,7 +217,7 @@ function setupDOMControls () {
     uyControlsContainer.style("alignItems", "center");
 
     uySliderLabel.style("marginRight", "3px");
-    
+
     uySlider.style("width", "150px");
     uySlider.style("marginRight", "5px");
 
@@ -228,7 +225,7 @@ function setupDOMControls () {
     uyInput.style("font-family", "inherit");
     uyInput.style("font-size", "inherit");
   }
-  
+
   // Add event listeners
   uxSlider.elt.oninput = uxSlider_onInputHandler;
   uxInput.elt.onchange = uxInput_onChangeHandler;
@@ -248,50 +245,50 @@ function updateDomControls () {
 
 function updateValuesUsing_ux (_ux) {
   ux = _ux;
-  
+
   theta = acos(ux);
-  
+
   /* Looks like ux not enough to determine uy...
-  
+
      probably something to do with sq(num) == sq(-num)
-  
+
      Use delta theta to pick direction?
      what about textbox?
   */
 
   uy = sin(theta);
   // uy = -sin(theta);  // ??
-  
-  updateValues();  
+
+  updateValues();
 }
 
 function updateValuesUsing_uy (_uyCartesian) {
   uy = -_uyCartesian;  // use p5 y-direction internally
-  
+
   theta = asin(uy);
-  
+
   // ux = cos(theta);
   ux = -cos(theta);
-  
+
   updateValues();
 }
 
 function updateValuesUsing_mousePos () {
   theta = atan2(mouseY - cy, mouseX - cx);
-  
+
   ux = cos(theta);
   uy = sin(theta);
-  
+
   updateValues();
 }
-  
+
 function updateValues () {
   px = cx + (ux * circleR);
   py = cy + (uy * circleR);
 
   pLabelX = cx + (ux * (circleR + pLabelOffset));
   pLabelY = cy + (uy * (circleR + pLabelOffset));
-  
+
   // Display changes
   {
     // update DOM controls
@@ -314,7 +311,7 @@ function canvas_mouseMovedHandler () {
   let distanceToP = sq(mouseX - px) + sq(mouseY - py);
 
   if (distanceToP <= closeEnough) {
-    pIsHovered = true;    
+    pIsHovered = true;
   }
   else {
     pIsHovered = false;
@@ -382,7 +379,7 @@ function windowResized () {
   */
   cx = width / 2;
   cy = height / 2;
-  
+
   // redo pixel calculations (also redraws)
   updateValues();
 }
@@ -392,12 +389,12 @@ function windowResized () {
 
 function drawGrid () {
   strokeWeight(1);
-  
+
   // draw axes
   stroke(gridColor);
   line(cx, 0, cx, height);
   line(0, cy, width, cy);
-  
+
   // draw ticks on axes
   {
     stroke(gridTickColor);
@@ -415,7 +412,7 @@ function drawGrid () {
       line(cx - t, y, cx + t, y);
     }
   }
-  
+
   // label axes
   fill(gridLabelColor);
   noStroke();
@@ -460,11 +457,11 @@ function drawPoint () {
   noStroke();
   ellipse(px, py, d, d);
 
-  
+
   // draw point label
   noStroke();
   textSize(14);
-  
+
   // flip orientation for legibility
   if (ux >= 0) {
     textAlign(LEFT, CENTER);
@@ -551,9 +548,9 @@ function debug () {
 
 // ----------------------------------------------
 
-function draw () {  
+function draw () {
   // console.log(frameCount);
-  
+
   background(bgColor);
 
   drawGrid();

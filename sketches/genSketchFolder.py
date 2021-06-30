@@ -14,7 +14,7 @@ indexContent = """<!DOCTYPE html>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/5.0.0/math.min.js"></script>
 
     <meta charset="utf-8" />
-    
+
     <style type="text/css">
 
       html, body {
@@ -37,13 +37,21 @@ indexContent = """<!DOCTYPE html>
 </html>
 """
 
-sketchContent = """function setup () {
-  createCanvas(400, 400);
-}
+sketchContent = """let sketch = function (p) {
 
-function draw () {
-  background(220);
-}
+  p.setup = function () {
+    p.createCanvas(400, 400);
+  }
+
+  p.draw = function () {
+    p.background(220);
+    p.noLoop();
+  }
+
+}  // end sketch
+
+// Note: myp5 == p
+let myp5 = new p5(sketch);
 """
 
 
