@@ -37,11 +37,11 @@ indexContent = """<!DOCTYPE html>
 </html>
 """
 
-sketchContent = """function setup() {
+sketchContent = """function setup () {
   createCanvas(400, 400);
 }
 
-function draw() {
+function draw () {
   background(220);
 }
 """
