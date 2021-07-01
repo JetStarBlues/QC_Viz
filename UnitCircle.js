@@ -53,6 +53,8 @@
     - mouse drag & selected
     - slider
     - set from ket
+
+  - Make imaginary point draggable?
 */
 
 class UnitCircle {
@@ -61,30 +63,48 @@ class UnitCircle {
 
     this.p = p;  // p5.js instance...
 
+    /* Do we have this property in every drawable...
+       Set to true if requires redraw.
+       Global dispatcher iterates through all drawables, and
+       calles their render method if they need to be redrawn??
+
+       Or KISS, and just redraw everything on
+       - all mouse events
+       - ...
+    */
+    this.isDirty = false;
+
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
     // Configure display
     this.showLabel = true;
     this.showComplexLabel = true;
+    this.showUnitaryProof = true;
 
-    this.showAxisProjections = true;
+    this.showAxisProjections = false;
 
-    this.renderAsComplexCircle = false;
-    this.showImaginaryCircle = false;
-    this.showImagniaryPoint = false;
+    this.renderAsComplexCircle = true;
+    this.showImaginaryCircle = true;
+    this.showImagniaryPoint = true;
 
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
     // value (unitary)
     // arbitrary default value
-    this.realX = 0.6;
-    this.realY = -0.8;  // use p5 y-direction internally  // TODO, p5 y-axis thing
-    this.imgX = 0;
-    this.imgY = 0;
-    this.realMagnitude = 1;
-    this.imgMagnitude = 0;
+    // this.realX = 0.6;
+    // this.realY = -0.8;  // use p5 y-direction internally  // TODO, p5 y-axis thing
+    // this.imgX = 0;
+    // this.imgY = 0;
+    // this.realMagnitude = 1;
+    // this.imgMagnitude = 0;
+    this.realX = 0.4;
+    this.realY = -0.2;  // use p5 y-direction internally  // TODO, p5 y-axis thing
+    this.imgX = 0.5;
+    this.imgY = 0.5;
+    this.realMagnitude = this.p.sqrt(this.p.sq(this.realX) + this.p.sq(this.realY));
+    this.imgMagnitude = this.p.sqrt(this.p.sq(this.imgX) + this.p.sq(this.imgY));
 
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
@@ -95,8 +115,8 @@ class UnitCircle {
     this.circleHalfRadius = this.circleRadius / 2;
 
     // center pos (pixels)
-    this.centerX;
-    this.centerY;
+    this.centerX = 0;  // arbitrary default value
+    this.centerY = 0;
 
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
@@ -110,6 +130,7 @@ class UnitCircle {
     this.pointLabelX;
     this.pointLabelY;
     this.pointLabelOffset = 30;  // TODO, make resizable
+    // this.pointLabelOffset = 20;  // TODO, make resizable
     //
     this.pointLabelTextSize = 14;
 
@@ -135,28 +156,36 @@ class UnitCircle {
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
+    // ...
+    this.updateMiscellanea();
+
+
+    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
     // colors
     // this.bgColor = this.p.color(colors["background0"]);
 
     this.realCircleColor = this.p.color(0);
-    this.unitCircleColor = this.p.color(100);
-    this.imgCircleColor = this.p.color(0, 255, 0);  // TODO, change me
+    // this.unitCircleColor = this.p.color(180);
+    this.unitCircleColor = this.p.color(colors["unitCircle0"]);
+    this.imgCircleColor = this.p.color(colors["imgCircle0"]);  // TODO, change me
 
     this.vectorColor = this.p.color(0);
-    this.imgVectorColor = this.p.color(0, 255, 0);  // TODO, change me
+    this.imgVectorColor = this.p.color(colors["imgCircle0"]);  // TODO, change me
 
     this.pointColor = this.p.color(0);
     this.pointColorHovered = this.p.color(colors["point0"]);
-    this.imgPointColor = this.p.color(0, 255, 0);  // TODO, change me
+    this.imgPointColor = this.p.color(colors["imgCircle0"]);  // TODO, change me
 
     this.pointLabelBaseColor = this.p.color(0);
     this.pointLabelSecondaryColor = this.p.color(colors["pointLabel0"]);
-    this.pointLabelErrorColor = this.p.color(255, 0, 0);  // TODO, change me
+    // this.pointLabelErrorColor = this.p.color(255, 0, 0);  // TODO, change me
+    this.pointLabelErrorColor = this.p.color(colors["pointLabelError0"]);  // TODO, change me
 
     this.realProjectionXColor = this.p.color(0);
     this.realProjectionYColor = this.p.color(0);
-    this.imgProjectionXColor = this.p.color(0, 255, 0);  // TODO, change me
-    this.imgProjectionYColor = this.p.color(0, 255, 0);  // TODO, change me
+    this.imgProjectionXColor = this.p.color(colors["imgCircle0"]);  // TODO, change me
+    this.imgProjectionYColor = this.p.color(colors["imgCircle0"]);  // TODO, change me
   }
 
 
@@ -186,6 +215,9 @@ class UnitCircle {
   setCenter (x, y) {
     this.centerX = x;
     this.centerY = y;
+
+    // Hmm...
+    this.updateMiscellanea();
   }
 
 
@@ -219,7 +251,7 @@ class UnitCircle {
 
   // ----------------------------------------------
 
-  updateValuesUsingMousePos () {
+  updateValuesUsingMouse () {
     /* Assumes `this.imgX` and `this.imgY`
        have *previously* been set with sliders
     */
@@ -234,6 +266,9 @@ class UnitCircle {
 
     this.realX = ux * this.realMagnitude;
     this.realY = uy * this.realMagnitude;
+
+    //
+    this.updateMiscellanea();
   }
 
   updateValuesUsingSliders () {
@@ -259,6 +294,9 @@ class UnitCircle {
 
     this.realX = ux * this.realMagnitude;
     this.realY = uy * this.realMagnitude;
+
+    //
+    this.updateMiscellanea();
   }
 
   updateValuesUsingKet () {
@@ -268,15 +306,69 @@ class UnitCircle {
 
     this.realMagnitude = this.p.sqrt(this.p.sq(this.realX) + this.p.sq(this.realY));
     this.imgMagnitude = this.p.sqrt(this.p.sq(this.imgX) + sthis.p.q(this.imgY));
+
+    //
+    this.updateMiscellanea();
+  }
+
+  updateMiscellanea () {
+    this.pointX = this.realX * this.circleRadius;
+    this.pointY = this.realY * this.circleRadius;
+
+    this.imgPointX = this.imgX * this.circleRadius;
+    this.imgPointY = this.imgY * this.circleRadius;
+
+    this.pointLabelX = this.realX * (this.circleRadius + this.pointLabelOffset);
+    this.pointLabelY = this.realY * (this.circleRadius + this.pointLabelOffset);
+
+    this.pointX += this.centerX;
+    this.pointY += this.centerY;
+    this.imgPointX += this.centerX;
+    this.imgPointY += this.centerY;
+    this.pointLabelX += this.centerX;
+    this.pointLabelY += this.centerY;
   }
 
 
   // ----------------------------------------------
 
-  mouseMovedHandler () {}
-  mousePressedHandler () {}
-  mouseReleasedHandler () {}
-  mouseDraggedHandler () {}
+  mouseMovedHandler () {
+
+    // User doesn't have to be exact
+    let closeEnough = this.pointRadius * 2.5;
+
+    // sq(a) + sq(b) = sq(c)
+    closeEnough = this.p.sq(closeEnough);
+    let distanceToPoint = (
+      this.p.sq(this.p.mouseX - this.pointX) +
+      this.p.sq(this.p.mouseY - this.pointY)
+    );
+
+    if (distanceToPoint <= closeEnough) {
+      this.pointIsHovered = true;
+    }
+    else {
+      this.pointIsHovered = false;
+    }
+  }
+
+  mousePressedHandler () {
+    if (this.pointIsHovered) {
+      this.pointIsSelected = true;
+      // this.p.noCursor();
+    }
+  }
+
+  mouseReleasedHandler () {
+    this.pointIsSelected = false;
+    // this.p.cursor();
+  }
+
+  mouseDraggedHandler () {
+    if (this.pointIsSelected) {
+      this.updateValuesUsingMouse();
+    }
+  }
 
 
   // ----------------------------------------------
@@ -290,15 +382,15 @@ class UnitCircle {
       this.p.stroke(this.unitCircleColor);
       this.p.circle(this.centerX, this.centerY, this.circleWidth);
 
-      // real circle
-      this.p.stroke(this.realCircleColor);
-      this.p.circle(this.centerX, this.centerY, this.circleWidth * this.realMagnitude);
-
       // imaginary circle
       if (this.showImaginaryCircle) {
         this.p.stroke(this.imgCircleColor);
         this.p.circle(this.centerX, this.centerY, this.circleWidth * this.imgMagnitude);
       }
+
+      // real circle
+      this.p.stroke(this.realCircleColor);
+      this.p.circle(this.centerX, this.centerY, this.circleWidth * this.realMagnitude);
     }
     else {
       // real circle
@@ -308,23 +400,37 @@ class UnitCircle {
   }
 
   drawAxisProjections () {
+    // Imaginary
+    if (this.renderAsComplexCircle && this.showImaginaryCircle) {
+      this.p.stroke(this.imgProjectionXColor);
+      this.p.line(this.imgPointX, this.imgPointY, this.imgPointX, this.centerY);
+      this.p.stroke(this.imgProjectionYColor);
+      this.p.line(this.imgPointX, this.imgPointY, this.centerX, this.imgPointY);
+    }
+
     // Real
     this.p.strokeWeight(1);
     this.p.stroke(this.realProjectionXColor);
     this.p.line(this.pointX, this.pointY, this.pointX, this.centerY);
     this.p.stroke(this.realProjectionYColor);
     this.p.line(this.pointX, this.pointY, this.centerX, this.pointY);
-
-    // Imaginary
-    if (this.renderAsComplexCircle && this.showImaginaryCircle) {
-      this.p.stroke(this.imgProjectionXColor);
-      this.p.line(this.imgPointX, this.imgPointY, this.imgPointX, this.centerY);
-      this.p.stroke(this.this.imgProjectionYColor);
-      this.p.line(this.imgPointX, this.imgPointY, this.centerX, imgPointY);
-    }
   }
 
   drawPoint () {
+    // Imaginary
+    if (this.renderAsComplexCircle && this.showImaginaryCircle && this.showImagniaryPoint)
+    {
+      // draw line to point
+      this.p.strokeWeight(2);
+      this.p.stroke(this.imgVectorColor);
+      this.p.line(this.centerX, this.centerY, this.imgPointX, this.imgPointY);
+
+      // draw point
+      this.p.noStroke();
+      this.p.fill(this.imgPointColor);
+      this.p.circle(this.imgPointX, this.imgPointY, this.imgPointDiameter);
+    }
+
     // Real
     {
       // draw line to point
@@ -345,24 +451,10 @@ class UnitCircle {
       this.p.noStroke();
       this.p.circle(this.pointX, this.pointY, d);
     }
-
-    // Imaginary
-    if (this.renderAsComplexCircle && this.showImaginaryCircle && this.showImagniaryPoint)
-    {
-      // draw line to point
-      this.p.strokeWeight(2);
-      this.p.stroke(this.imgVectorColor);
-      this.p.line(this.centerX, this.centerY, this.imgPointX, this.imgPointY);
-
-      // draw point
-      this.p.noStroke();
-      this.p.fill(this.imgPointColor);
-      this.p.circle(this.imgPointX, this.imgPointY, this.imgPointDiameter);
-    }
   }
 
   drawPointLabel () {
-    p.noStroke();
+    this.p.noStroke();
     this.p.textFont("monospace");
     this.p.textSize(this.pointLabelTextSize);
 
@@ -391,26 +483,47 @@ class UnitCircle {
         `(${realXText} + ${imgXText}i) ∣0⟩ + (${realYText} + ${imgYText}i) ∣1⟩`,
         this.pointLabelX, this.pointLabelY
       );
+    }
 
-      // equality thing
-      this.p.fill(this.pointLabelBaseColor);
+    if (this.showUnitaryProof) {
+
+      // equation
+      this.p.fill(this.pointLabelSecondaryColor);
+
+      let y = this.pointLabelY + (this.pointLabelTextSize * 2);
       this.p.text(
-        `1 = real𝛼² + img𝛼² + real𝛽² + img𝛽²`,
-        this.pointLabelX, this.pointLabelY + this.pointLabelTextSize
+        ` 1 = (real𝛼² + img𝛼²) + (real𝛽² + img𝛽²)`,
+        this.pointLabelX, y
       )
-      let symbol = "=";
-      if (! this.isUnitary) {
+
+      // substitution
+      let symbol;
+      if (this.isUnitary()) {
+        symbol = "=";
+        this.p.fill(this.pointLabelSecondaryColor);
+      }
+      else {
         symbol = "≠";
         this.p.fill(this.pointLabelErrorColor);
       }
-      this.p.text(
-        `1 ${symbol} ` +
-        `${roundAtMost(this.p.sq(this.realX, 2))} + ${roundAtMost(this.p.sq(this.imgX, 2))} + ` +
-        `${roundAtMost(this.p.sq(this.realY, 2))} + ${roundAtMost(sq(this.imgY, 2))}`,
 
-        this.pointLabelX, this.pointLabelY + this.pointLabelTextSize * 2
+      y += this.pointLabelTextSize * 1.4;
+      this.p.text(
+        `   ${symbol} ` +
+        `(${roundAtMost(this.realX, 2)}² + ${roundAtMost(this.imgX, 2)}²) + ` +
+        `(${roundAtMost(this.realY, 2)}² + ${roundAtMost(this.imgY, 2)}²)`,
+
+        this.pointLabelX, y
       )
 
+      y += this.pointLabelTextSize * 1.4;
+      this.p.text(
+        `   ${symbol} ` +
+        `(${roundAtMost(this.p.sq(this.realX), 2)} + ${roundAtMost(this.p.sq(this.imgX), 2)}) + ` +
+        `(${roundAtMost(this.p.sq(this.realY), 2)} + ${roundAtMost(this.p.sq(this.imgY), 2)})`,
+
+        this.pointLabelX, y
+      )
     }
   }
 
