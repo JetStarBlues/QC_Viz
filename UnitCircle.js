@@ -125,7 +125,7 @@ class UnitCircle {
     this.circleRadius = this.circleWidth / 2;
     this.circleHalfRadius = this.circleRadius / 2;
 
-    // center pos (pixels)
+    // center position (pixels)
     this.centerX = 0;  // arbitrary default value
     this.centerY = 0;
 
@@ -134,10 +134,10 @@ class UnitCircle {
 
     // Point on real circle
 
-    // point pos (pixels)
+    // point position (pixels)
     this.pointX;
     this.pointY;
-    // point label pos (pixels)
+    // point label position (pixels)
     this.pointLabelX;
     this.pointLabelY;
     this.pointLabelOffset = 30;  // TODO, make resizable
@@ -159,7 +159,7 @@ class UnitCircle {
 
     // Point on imaginary cicle
 
-    // point pos (pixels)
+    // point position (pixels)
     this.imgPointX;
     this.imgPointY;
 
@@ -254,14 +254,14 @@ class UnitCircle {
 
   // ----------------------------------------------
 
-  setSize ( newCircleWidth ) {
+  setSize (newCircleWidth) {
 
     this.circleWidth = newCircleWidth;
     this.circleRadius = this.circleWidth / 2;
     this.circleHalfRadius = this.circleRadius / 2;
 
     // Shrink point size? or KISS?
-    if ( newCircleWidth < this.baseCircleWidth * 0.5 )
+    if (newCircleWidth < this.baseCircleWidth * 0.5)
     {
       this.pointDiameter = 6;
       this.pointDiameterHovered = this.pointDiameter * 1.3;
@@ -272,13 +272,15 @@ class UnitCircle {
       this.imgVectorThickness = 2;
     }
 
+    // TODO, sliders would need to be resized
+
     this.updateMiscellanea();
   }
 
 
   // ----------------------------------------------
 
-  updateValuesUsingMouse ( updateRealValues ) {
+  updateValuesUsingMouse (updateRealValues) {
     /* Assumes `this.imgX` and `this.imgY`
        have *previously* been set with sliders
     */
@@ -295,7 +297,7 @@ class UnitCircle {
       this.realX = ux * this.realMagnitude;
       this.realY = uy * this.realMagnitude;
     }
-    else if (this.renderAsComplexCircle && this.showImaginaryCircle) {
+    else {
       this.imgX = ux * this.imgMagnitude;
       this.imgY = uy * this.imgMagnitude;
 
@@ -395,11 +397,12 @@ class UnitCircle {
     }
 
     // imaginary point
-    if (this.mouseIsCloseToPoint(this.imgPointX, this.imgPointY, this.imgPointRadius)) {
-      this.imgPointIsHovered = true;
-    }
-    else {
-      this.imgPointIsHovered = false;
+    this.imgPointIsHovered = false;
+
+    if (this.renderAsComplexCircle && this.showImaginaryCircle) {
+      if (this.mouseIsCloseToPoint(this.imgPointX, this.imgPointY, this.imgPointRadius)) {
+        this.imgPointIsHovered = true;
+      }
     }
 
     // only one can be chosen... default to real
@@ -427,10 +430,10 @@ class UnitCircle {
 
   mouseDraggedHandler () {
     if (this.pointIsSelected) {
-      this.updateValuesUsingMouse( true );
+      this.updateValuesUsingMouse(true);
     }
     else if (this.imgPointIsSelected) {
-      this.updateValuesUsingMouse( false );
+      this.updateValuesUsingMouse(false);
     }
   }
 
