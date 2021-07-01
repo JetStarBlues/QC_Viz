@@ -43,9 +43,6 @@
   - How handle loop/noLoop
     - do we just move to "global" dispatcher?
 
-  - Where chuck windowResized event handler?
-    - "global" dispatcher?
-
   - Events that should trigger redraw
     - mouse move, press, release, drag
     - window resize
@@ -55,13 +52,18 @@
     - set from ket
 
   - Make imaginary point draggable?
+
+  - Think a bit about how the y-axis direction thing
+    - Currently, we use p5 negative value in calculations,
+      and only invert when displaying (ex as label)
+    - How will this behave when apply gate matrix ??
 */
 
 class UnitCircle {
 
   constructor (p) {
 
-    this.p = p;  // p5.js instance...
+    this.p = p;  // p5.js instance
 
     /* Do we have this property in every drawable...
        Set to true if requires redraw.
@@ -80,25 +82,26 @@ class UnitCircle {
     // Configure display
     this.showLabel = true;
     this.showComplexLabel = true;
-    this.showUnitaryProof = true;
+    this.showUnitaryProof = false;
 
     this.showAxisProjections = false;
 
     this.renderAsComplexCircle = true;
     this.showImaginaryCircle = true;
-    this.showImagniaryPoint = true;
 
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
     // value (unitary)
     // arbitrary default value
+
     // this.realX = 0.6;
     // this.realY = -0.8;  // use p5 y-direction internally  // TODO, p5 y-axis thing
     // this.imgX = 0;
     // this.imgY = 0;
     // this.realMagnitude = 1;
     // this.imgMagnitude = 0;
+
     this.realX = 0.4;
     this.realY = -0.2;  // use p5 y-direction internally  // TODO, p5 y-axis thing
     this.imgX = 0.5;
@@ -106,11 +109,19 @@ class UnitCircle {
     this.realMagnitude = this.p.sqrt(this.p.sq(this.realX) + this.p.sq(this.realY));
     this.imgMagnitude = this.p.sqrt(this.p.sq(this.imgX) + this.p.sq(this.imgY));
 
+    // this.realX = 0;
+    // this.realY = 0;  // use p5 y-direction internally  // TODO, p5 y-axis thing
+    // this.imgX = 0.6;
+    // this.imgY = 0.8;
+    // this.realMagnitude = this.p.sqrt(this.p.sq(this.realX) + this.p.sq(this.realY));
+    // this.imgMagnitude = this.p.sqrt(this.p.sq(this.imgX) + this.p.sq(this.imgY));
+
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
     // circle dimensions (pixels)
-    this.circleWidth = 180;  // TODO, make resizable
+    this.baseCircleWidth = 180;
+    this.circleWidth = this.baseCircleWidth;  // TODO, make resizable
     this.circleRadius = this.circleWidth / 2;
     this.circleHalfRadius = this.circleRadius / 2;
 
@@ -121,7 +132,7 @@ class UnitCircle {
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
-    // point on real circle
+    // Point on real circle
 
     // point pos (pixels)
     this.pointX;
@@ -130,9 +141,8 @@ class UnitCircle {
     this.pointLabelX;
     this.pointLabelY;
     this.pointLabelOffset = 30;  // TODO, make resizable
-    // this.pointLabelOffset = 20;  // TODO, make resizable
     //
-    this.pointLabelTextSize = 14;
+    this.pointLabelTextSize = 14;  // TODO, make resizable?
 
     //
     this.pointIsHovered = false;
@@ -141,17 +151,28 @@ class UnitCircle {
     this.pointDiameterHovered = this.pointDiameter * 1.3;
     this.pointRadius = this.pointDiameter / 2;
 
+    // line thickness
+    this.vectorThickness = 4;
+
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
-    // point on imaginary cicle
+    // Point on imaginary cicle
 
     // point pos (pixels)
     this.imgPointX;
     this.imgPointY;
 
     //
+    this.imgPointIsHovered = false;
+    this.imgPointIsSelected = false;
     this.imgPointDiameter = this.pointDiameter * 0.8;
+    this.imgPointDiameterHovered = this.imgPointDiameter * 1.3;
+    this.imgPointRadius = this.imgPointDiameter / 2;
+
+    // line thickness
+    this.imgVectorThickness = 2;
+
 
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
@@ -166,7 +187,6 @@ class UnitCircle {
     // this.bgColor = this.p.color(colors["background0"]);
 
     this.realCircleColor = this.p.color(0);
-    // this.unitCircleColor = this.p.color(180);
     this.unitCircleColor = this.p.color(colors["unitCircle0"]);
     this.imgCircleColor = this.p.color(colors["imgCircle0"]);  // TODO, change me
 
@@ -176,10 +196,10 @@ class UnitCircle {
     this.pointColor = this.p.color(0);
     this.pointColorHovered = this.p.color(colors["point0"]);
     this.imgPointColor = this.p.color(colors["imgCircle0"]);  // TODO, change me
+    this.imgPointColorHovered = this.p.color(colors["imgPoint0"]);
 
     this.pointLabelBaseColor = this.p.color(0);
     this.pointLabelSecondaryColor = this.p.color(colors["pointLabel0"]);
-    // this.pointLabelErrorColor = this.p.color(255, 0, 0);  // TODO, change me
     this.pointLabelErrorColor = this.p.color(colors["pointLabelError0"]);  // TODO, change me
 
     this.realProjectionXColor = this.p.color(0);
@@ -209,7 +229,7 @@ class UnitCircle {
     this.realX = ket[1].re;
     this.imgX = ket[1].im;
 
-    // recalculate realTheta...
+    // TODO, call `updateValuesUsingKet` here?
   }
 
   setCenter (x, y) {
@@ -234,24 +254,31 @@ class UnitCircle {
 
   // ----------------------------------------------
 
-  setSize () {
-    // TODO
+  setSize ( newCircleWidth ) {
 
-/*
-    this.circleWidth = ?;
+    this.circleWidth = newCircleWidth;
     this.circleRadius = this.circleWidth / 2;
     this.circleHalfRadius = this.circleRadius / 2;
 
-    this.pointLabelOffset = ?
+    // Shrink point size? or KISS?
+    if ( newCircleWidth < this.baseCircleWidth * 0.5 )
+    {
+      this.pointDiameter = 6;
+      this.pointDiameterHovered = this.pointDiameter * 1.3;
+      this.pointRadius = this.pointDiameter / 2;
+      this.imgPointDiameter = this.pointDiameter * 0.8;
 
-    this.pointDiameter = ?
-*/
+      this.vectorThickness = 3;
+      this.imgVectorThickness = 2;
+    }
+
+    this.updateMiscellanea();
   }
 
 
   // ----------------------------------------------
 
-  updateValuesUsingMouse () {
+  updateValuesUsingMouse ( updateRealValues ) {
     /* Assumes `this.imgX` and `this.imgY`
        have *previously* been set with sliders
     */
@@ -264,8 +291,16 @@ class UnitCircle {
     let ux = this.p.cos(theta);
     let uy = this.p.sin(theta);
 
-    this.realX = ux * this.realMagnitude;
-    this.realY = uy * this.realMagnitude;
+    if (updateRealValues) {
+      this.realX = ux * this.realMagnitude;
+      this.realY = uy * this.realMagnitude;
+    }
+    else if (this.renderAsComplexCircle && this.showImaginaryCircle) {
+      this.imgX = ux * this.imgMagnitude;
+      this.imgY = uy * this.imgMagnitude;
+
+      // TODO, would need to propogate change to sliders
+    }
 
     //
     this.updateMiscellanea();
@@ -332,23 +367,44 @@ class UnitCircle {
 
   // ----------------------------------------------
 
-  mouseMovedHandler () {
-
+  mouseIsCloseToPoint (pX, pY, pRadius) {
     // User doesn't have to be exact
-    let closeEnough = this.pointRadius * 2.5;
+    let closeEnough = pRadius * 2.5;
 
     // sq(a) + sq(b) = sq(c)
     closeEnough = this.p.sq(closeEnough);
     let distanceToPoint = (
-      this.p.sq(this.p.mouseX - this.pointX) +
-      this.p.sq(this.p.mouseY - this.pointY)
+      this.p.sq(this.p.mouseX - pX) +
+      this.p.sq(this.p.mouseY - pY)
     );
 
-    if (distanceToPoint <= closeEnough) {
+    return distanceToPoint <= closeEnough;
+  }
+
+
+  // ----------------------------------------------
+
+  mouseMovedHandler () {
+
+    // real point
+    if (this.mouseIsCloseToPoint(this.pointX, this.pointY, this.pointRadius)) {
       this.pointIsHovered = true;
     }
     else {
       this.pointIsHovered = false;
+    }
+
+    // imaginary point
+    if (this.mouseIsCloseToPoint(this.imgPointX, this.imgPointY, this.imgPointRadius)) {
+      this.imgPointIsHovered = true;
+    }
+    else {
+      this.imgPointIsHovered = false;
+    }
+
+    // only one can be chosen... default to real
+    if (this.pointIsHovered && this.imgPointIsHovered) {
+      this.imgPointIsHovered = false;
     }
   }
 
@@ -357,16 +413,24 @@ class UnitCircle {
       this.pointIsSelected = true;
       // this.p.noCursor();
     }
+    else if (this.imgPointIsHovered) {
+      this.imgPointIsSelected = true;
+      // this.p.noCursor();
+    }
   }
 
   mouseReleasedHandler () {
     this.pointIsSelected = false;
+    this.imgPointIsSelected = false;
     // this.p.cursor();
   }
 
   mouseDraggedHandler () {
     if (this.pointIsSelected) {
-      this.updateValuesUsingMouse();
+      this.updateValuesUsingMouse( true );
+    }
+    else if (this.imgPointIsSelected) {
+      this.updateValuesUsingMouse( false );
     }
   }
 
@@ -418,23 +482,31 @@ class UnitCircle {
 
   drawPoint () {
     // Imaginary
-    if (this.renderAsComplexCircle && this.showImaginaryCircle && this.showImagniaryPoint)
+    if (this.renderAsComplexCircle && this.showImaginaryCircle)
     {
       // draw line to point
-      this.p.strokeWeight(2);
+      this.p.strokeWeight(this.imgVectorThickness);
       this.p.stroke(this.imgVectorColor);
       this.p.line(this.centerX, this.centerY, this.imgPointX, this.imgPointY);
 
       // draw point
+      let d;
+      if (this.imgPointIsHovered || this.imgPointIsSelected) {
+        this.p.fill(this.imgPointColorHovered);
+        d = this.imgPointDiameterHovered;
+      }
+      else {
+        this.p.fill(this.imgPointColor);
+        d = this.imgPointDiameter;
+      }
       this.p.noStroke();
-      this.p.fill(this.imgPointColor);
-      this.p.circle(this.imgPointX, this.imgPointY, this.imgPointDiameter);
+      this.p.circle(this.imgPointX, this.imgPointY, d);
     }
 
     // Real
     {
       // draw line to point
-      this.p.strokeWeight(4);
+      this.p.strokeWeight(this.vectorThickness);
       this.p.stroke(this.vectorColor);
       this.p.line(this.centerX, this.centerY, this.pointX, this.pointY);
 
@@ -473,8 +545,8 @@ class UnitCircle {
     let realYText = roundAtMost(- this.realY, 2);  // display cartesian y-direction
     let imgYText = roundAtMost(- this.imgY, 2);  // display cartesian y-direction
 
-    // TODO, would need to add simplified case
-  // if (this.showComplexLabel) {}
+    // TODO, add simplified case
+    // if (this.showComplexLabel) {}
 
     // basic label
     {
@@ -524,6 +596,19 @@ class UnitCircle {
 
         this.pointLabelX, y
       )
+
+      // Add one more line if not unitary, less math for user to do in head
+      y += this.pointLabelTextSize * 1.4;
+      if (symbol === "≠") {
+        this.p.text(
+          `   ${symbol} ` +
+          `${roundAtMost(
+            this.p.sq(this.realX) + this.p.sq(this.imgX) + this.p.sq(this.realY) + this.p.sq(this.imgY),
+            2
+          )}`,
+          this.pointLabelX, y
+        );
+      }
     }
   }
 

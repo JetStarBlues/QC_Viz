@@ -29,4 +29,3 @@ function compareFloat (a, b, epsilon=0.00001) {
 function roundAtMost (x, maxPrecision) {
   return +(x.toFixed(maxPrecision));
 }
-

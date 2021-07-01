@@ -9,6 +9,8 @@ colors = {
   "pointLabel0" : [108, 91, 123],
   "pointLabelError0" : [246, 114, 128],
 
+  "imgPoint0" : [53,92,125],
+
   // www.colourlovers.com/palette/1597233/500_honies
   "background0" : [253, 241, 204],
   "unitCircle0" : [152, 127, 105],
