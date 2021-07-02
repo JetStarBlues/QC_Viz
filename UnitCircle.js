@@ -57,6 +57,9 @@
     - Currently, we use p5 negative value in calculations,
       and only invert when displaying (ex as label)
     - How will this behave when apply gate matrix ??
+
+  - TODO,
+    turn "red" if not showing proof and state not unitary
 */
 
 class UnitCircle {

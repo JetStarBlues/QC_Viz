@@ -8,7 +8,7 @@ let sketch = function (p) {
     s = new Slider(
       p,
       50, 50, 200, 50,
-      0, 1, 0.5
+      0, 1, 0.5, 0.1
       );
   }
 

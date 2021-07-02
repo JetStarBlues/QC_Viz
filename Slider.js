@@ -1,12 +1,15 @@
-/*
-  - Is this approach viable
+/* Based on:
     - https://processing.org/examples/scrollbar.html
     - https://www.khanacademy.org/cs/a/6032791229661184
 */
 
 /* TODO
-   - how do "step"
    - resize
+*/
+
+/*
+  Preliminary work on supporting `step`.
+  For now, on-hold until use case arises.
 */
 
 class Slider {
@@ -25,14 +28,14 @@ class Slider {
     // Value range slider represents
     this.minValue = minValue;
     this.maxValue = maxValue;
-    // this.initialValue = initialValue ? initialValue : 0;
-    this.step = step ? step : 1;
+    this.step = step;  // optional (also not currently implemented)
 
     // size and position of the bar
     this.barWidth  = barWidth;
     this.barHeight = barHeight;
     this.barXPos   = barXPos;
     this.barYPos   = barYPos;
+
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
@@ -53,7 +56,6 @@ class Slider {
     }
     else {
       // initialize at center of bar
-// Hmm....
       this.knobXPos = this.barXPos + (this.barWidth - this.knobWidth) / 2;
     }
     this.knobYPos = this.barYPos;
@@ -75,11 +77,42 @@ class Slider {
   // ----------------------------------------------
 
   getValue () {
-    /* TODO
-       - floor returned value using step??
-    */
+    let value = this.p.map(
+      this.knobXPos,
+      this.knobXPosMin, this.knobXPosMax,
+      this.minValue, this.maxValue
+    );
 
-    // return map()
+    return value;
+
+
+    /*
+      Consider `this.step` in value returned.
+      Want to floor value accordingly. E.g.
+        minValue = 0
+        maxValue = 4
+        value = 3.6
+
+        if step = 1, return 3
+        if step = 0.5, return 3.5
+
+      TODO,
+      this should probably be round, not floor.
+      i.e. with example above
+        if step = 1, return 4
+        if step = 0.5, return 3.5
+    */
+    /*
+    if (this.step != null)
+    {
+      if ((value % this.step) === 0) {
+        return value;
+      }
+      else {
+        return this.p.floor(value / this.step) * this.step;
+      }
+    }
+    */
   }
 
   setValue (newValue) {
@@ -93,7 +126,15 @@ class Slider {
 
   // ----------------------------------------------
 
-  resize () {
+  setSize (barWidth, barHeight) {
+    //
+  }
+
+  setKnobSize (knobWidth, knobHeight) {
+    //
+  }
+
+  setTopLeft (barXPos, barYPos) {
     //
   }
 
@@ -106,6 +147,28 @@ class Slider {
       this.p.mouseX - this.knobHalfWidth,  // keeps mouse at center of knob...
       this.knobXPosMin, this.knobXPosMax
     );
+
+    console.log(this.getValue());
+
+    /*
+      "Snap" according to `this.step`.
+      Currently not implemented.
+
+      Probaby trickier than might seem at first glance.
+      Slider snaps to a position based on round?....
+
+       0       1          2        3        4
+      ||---.---||--x-.-x--||---.---||---.---||
+                   ^   ^
+                   |   |_ slider will snap to 2
+                   |
+                   |_ slider will snap to 1
+    */
+    /*
+    if (this.step != null) {
+      // TODO
+    }
+    */
   }
 
 
@@ -113,7 +176,6 @@ class Slider {
 
   mouseIsOverKnob () {
     return (
-
       (this.p.mouseX >= this.knobXPos) &&
       (this.p.mouseX <= this.knobXPos + this.knobWidth) &&
       (this.p.mouseY >= this.knobYPos) &&
@@ -161,6 +223,12 @@ class Slider {
     this.p.stroke(255,0,0);
     let x = this.barXPos + (this.barWidth / 2);
     this.p.line(x, this.barYPos, x, this.barYPos + this.barHeight);
+
+    this.p.stroke(0,255,0);
+    for (let i = 0; i < 5; i += 1 ) {
+      x = this.barXPos + (this.barWidth / 5 * i);
+      this.p.line(x, this.barYPos, x, this.barYPos + this.barHeight);
+    }
     this.p.noStroke();
 
     // Draw knob
@@ -171,5 +239,9 @@ class Slider {
       this.p.fill(this.knobColor);
     }
     this.p.rect(this.knobXPos, this.knobYPos, this.knobWidth, this.knobHeight);
+
+    this.p.stroke(0,0,255);
+    x = this.knobXPos + (this.knobWidth / 2);
+    this.p.line(x, this.knobYPos, x, this.knobYPos + this.knobHeight);
   }
 }
