@@ -60,6 +60,16 @@
 
   - TODO,
     turn "red" if not showing proof and state not unitary
+
+  - UI/UX to somehow toggle visibility of details...
+    - right click?
+    - press hold?
+
+  - If have both sliders (real, imaginary)
+    - how avoid inability to set precise (eq 1)
+      - case for step e.g. if aiming for exactly 0.6 and 0.8
+    - do we want button or something that locks
+      - e.g. if adjust real, imaginary auto calculated to make 1?
 */
 
 class UnitCircle {
@@ -85,12 +95,15 @@ class UnitCircle {
     // Configure display
     this.showLabel = true;
     this.showComplexLabel = true;
-    this.showUnitaryProof = false;
-
-    this.showAxisProjections = false;
+    this.showNormalizedProof = false;
 
     this.renderAsComplexCircle = true;
     this.showImaginaryCircle = true;
+
+    this.showAxisProjections = false;
+
+    this.showSliders = true;
+    this.autoNormalizeSliders = false;  // hmm...
 
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
@@ -118,6 +131,8 @@ class UnitCircle {
     // this.imgY = 0.8;
     // this.realMagnitude = this.p.sqrt(this.p.sq(this.realX) + this.p.sq(this.realY));
     // this.imgMagnitude = this.p.sqrt(this.p.sq(this.imgX) + this.p.sq(this.imgY));
+
+    // TODO, propogate initial state to sliders...
 
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
@@ -156,6 +171,7 @@ class UnitCircle {
 
     // line thickness
     this.vectorThickness = 4;
+    this.realCircleThickness = 2;
 
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
@@ -174,8 +190,70 @@ class UnitCircle {
     this.imgPointRadius = this.imgPointDiameter / 2;
 
     // line thickness
-    this.imgVectorThickness = 2;
+    this.imgVectorThickness = 3;
+    this.imgCircleThickness = 2;
 
+
+    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+    // slider dimensions (pixels)
+    this.sliderWidth = this.baseCircleWidth;
+    this.sliderHeight = 10;
+    this.sliderKnobWidth = this.sliderHeight * 2;
+
+    // slider position (pixels)
+    this.sliderBaseX = - this.circleRadius;
+    this.sliderBaseY = this.circleRadius * 1.5;
+
+    let sliderSpacing = this.sliderHeight * 2.3;
+    this.realXSliderYPos = this.sliderBaseY;
+    this.imgXSliderYPos = this.sliderBaseY + (sliderSpacing * 1);
+    this.realYSliderYPos = this.sliderBaseY + (sliderSpacing * 2);
+    this.imgYSliderYPos = this.sliderBaseY + (sliderSpacing * 3);
+
+    // realX slider
+    this.realXSlider = new Slider(
+      this.p,
+      this.sliderBaseX,
+      this.realXSliderYPos,
+      this.sliderWidth, this.sliderHeight, this.sliderKnobWidth,
+      -1, 1
+    );
+    this.realXSlider.setLabel("realX:");
+    this.realXSlider.showLabel = true;
+
+    // imgX slider
+    this.imgXSlider = new Slider(
+      this.p,
+      this.sliderBaseX,
+      this.imgXSliderYPos,
+      this.sliderWidth, this.sliderHeight, this.sliderKnobWidth,
+      -1, 1
+    );
+    this.imgXSlider.setLabel("imgX:");
+    this.imgXSlider.showLabel = true;
+
+    // realY slider
+    this.realYSlider = new Slider(
+      this.p,
+      this.sliderBaseX,
+      this.realYSliderYPos,
+      this.sliderWidth, this.sliderHeight, this.sliderKnobWidth,
+      -1, 1
+    );
+    this.realYSlider.setLabel("realY:");
+    this.realYSlider.showLabel = true;
+
+    // imgY slider
+    this.imgYSlider = new Slider(
+      this.p,
+      this.sliderBaseX,
+      this.imgYSliderYPos,
+      this.sliderWidth, this.sliderHeight, this.sliderKnobWidth,
+      -1, 1
+    );
+    this.imgYSlider.setLabel("imgY:");
+    this.imgYSlider.showLabel = true;
 
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
@@ -185,9 +263,6 @@ class UnitCircle {
 
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
-    // colors
-    // this.bgColor = this.p.color(colors["background0"]);
 
     this.realCircleColor = this.p.color(0);
     this.unitCircleColor = this.p.color(colors["unitCircle0"]);
@@ -203,12 +278,52 @@ class UnitCircle {
 
     this.pointLabelBaseColor = this.p.color(0);
     this.pointLabelSecondaryColor = this.p.color(colors["pointLabel0"]);
-    this.pointLabelErrorColor = this.p.color(colors["pointLabelError0"]);  // TODO, change me
+
+    this.errorColor = this.p.color(colors["error0"]);  // TODO, change me
 
     this.realProjectionXColor = this.p.color(0);
     this.realProjectionYColor = this.p.color(0);
     this.imgProjectionXColor = this.p.color(colors["imgCircle0"]);  // TODO, change me
     this.imgProjectionYColor = this.p.color(colors["imgCircle0"]);  // TODO, change me
+
+    // TODO
+    this.sliderBarColor = this.p.color(colors["sliderBar0"]);
+    this.sliderLabelColor = this.p.color(0);
+
+    // this.realSliderBarValueColor = this.p.color(0);  // ugh
+    this.realSliderBarValueColor = this.p.color(colors["sliderBarValue0"]);
+    this.realSliderKnobColor = this.p.color(colors["sliderKnob0"]);
+    this.realSliderKnobHoveredColor = this.p.color(colors["sliderKnobHovered0"]);
+
+    // this.imgSliderBarValueColor = this.p.color(colors["imgCircle0"]);
+    this.imgSliderBarValueColor = this.p.color(colors["sliderBarValue0"]);
+    // this.imgSliderKnobColor = this.p.color(colors["imgPoint0"]);
+    this.imgSliderKnobColor = this.p.color(colors["sliderKnob0"]);
+    this.imgSliderKnobHoveredColor = this.p.color(colors["sliderKnobHovered0"]);
+
+    this.realXSlider.barColor = this.sliderBarColor;
+    this.realXSlider.barValueColor = this.realSliderBarValueColor;
+    this.realXSlider.knobColor = this.realSliderKnobColor;
+    this.realXSlider.knobColorHovered = this.realSliderKnobHoveredColor;
+    this.realXSlider.labelColor = this.sliderLabelColor;
+
+    this.realYSlider.barColor = this.sliderBarColor;
+    this.realYSlider.barValueColor = this.realSliderBarValueColor;
+    this.realYSlider.knobColor = this.realSliderKnobColor;
+    this.realYSlider.knobColorHovered = this.realSliderKnobHoveredColor;
+    this.realYSlider.labelColor = this.sliderLabelColor;
+
+    this.imgXSlider.barColor = this.sliderBarColor;
+    this.imgXSlider.barValueColor = this.imgSliderBarValueColor;
+    this.imgXSlider.knobColor = this.imgSliderKnobColor;
+    this.imgXSlider.knobColorHovered = this.imgSliderKnobHoveredColor;
+    this.imgXSlider.labelColor = this.sliderLabelColor;
+
+    this.imgYSlider.barColor = this.sliderBarColor;
+    this.imgYSlider.barValueColor = this.imgSliderBarValueColor;
+    this.imgYSlider.knobColor = this.imgSliderKnobColor;
+    this.imgYSlider.knobColorHovered = this.imgSliderKnobHoveredColor;
+    this.imgYSlider.labelColor = this.sliderLabelColor;
   }
 
 
@@ -234,6 +349,20 @@ class UnitCircle {
 
     // TODO, call `updateValuesUsingKet` here?
   }
+
+
+  // ----------------------------------------------
+
+  calculateRealMagnitude () {
+    return this.p.sqrt(this.p.sq(this.realX) + this.p.sq(this.realY));
+  }
+
+  calculateImaginaryMagnitude () {
+    return this.p.sqrt(this.p.sq(this.imgX) + this.p.sq(this.imgY));
+  }
+
+
+  // ----------------------------------------------
 
   setCenter (x, y) {
     this.centerX = x;
@@ -264,7 +393,7 @@ class UnitCircle {
     this.circleHalfRadius = this.circleRadius / 2;
 
     // Shrink point size? or KISS?
-    if (newCircleWidth < this.baseCircleWidth * 0.5)
+    /*if (newCircleWidth < this.baseCircleWidth * 0.5)
     {
       this.pointDiameter = 6;
       this.pointDiameterHovered = this.pointDiameter * 1.3;
@@ -273,7 +402,7 @@ class UnitCircle {
 
       this.vectorThickness = 3;
       this.imgVectorThickness = 2;
-    }
+    }*/
 
     // TODO, sliders would need to be resized
 
@@ -299,13 +428,21 @@ class UnitCircle {
     if (updateRealValues) {
       this.realX = ux * this.realMagnitude;
       this.realY = uy * this.realMagnitude;
+
+      // propogate change to sliders
+      this.realXSlider.setValue(this.realX);
+      this.realYSlider.setValue(this.realY);  // TODO, the p5 y thing =/
     }
     else {
       this.imgX = ux * this.imgMagnitude;
       this.imgY = uy * this.imgMagnitude;
 
-      // TODO, would need to propogate change to sliders
+      // propogate change to sliders
+      this.imgXSlider.setValue(this.imgX);
+      this.imgYSlider.setValue(this.imgY);  // TODO, the p5 y thing =/
     }
+
+    // TODO, would need to propogate change to sliders
 
     //
     this.updateMiscellanea();
@@ -317,23 +454,81 @@ class UnitCircle {
     */
 
 // TODO
-    this.imgX = 0;  // TODO, get value from slider?
-    this.imgY = 0;  // TODO, get value from slider?
 
-    let imgMagnitudeSquared = this.p.sq(this.imgX) + sthis.p.q(this.imgY);
-    this.imgMagnitude = this.p.sqrt(imgMagnitudeSquared);
-    this.realMagnitude = this.p.sqrt(1 - imgMagnitudeSquared);
+// TODO, handle locking/auto
 
-    let theta = this.p.atan2(
-      this.p.mouseY - this.centerY,
-      this.p.mouseX - this.centerX
-    );
+    /* If user sets real sliders, imaginary values are auto-computed
+       to create normalized vector.
+       And vice versa if user sets imaginary sliders
+    */
+    if (this.autoNormalizeSliders) {
 
-    let ux = this.p.cos(theta);
-    let uy = this.p.sin(theta);
+      // user set real, auto set imaginary
+      if (this.realXSlider.knobIsSelected || this.realYSlider.knobIsSelected) {
+        console.log("user set real, auto set imaginary");
+        // get values from slider
+        this.realX = this.realXSlider.getValue();
+        this.realY = this.realYSlider.getValue();
 
-    this.realX = ux * this.realMagnitude;
-    this.realY = uy * this.realMagnitude;
+        // calculate magnitudes
+        let realMagnitudeSquared = this.p.sq(this.realX) + this.p.sq(this.realY);
+        this.realMagnitude = this.p.sqrt(realMagnitudeSquared);
+        this.imgMagnitude = this.p.sqrt(1 - realMagnitudeSquared);
+
+        // get current angle
+        let theta = this.p.atan2(this.imgY, this.imgX);
+        console.log(this.imgY, this.imgX, theta);
+
+        // calculate new values
+        this.imgX = this.p.cos(theta) * this.imgMagnitude;
+        this.imgY = this.p.sin(theta) * this.imgMagnitude;
+      }
+
+      // user set imaginary, auto set real
+      else {
+        console.log("user set imaginary, auto set real");
+        // get values from slider
+        this.imgX = this.imgXSlider.getValue();
+        this.imgY = this.imgYSlider.getValue();
+
+        // calculate magnitudes
+        let imgMagnitudeSquared = this.p.sq(this.imgX) + this.p.sq(this.imgY);
+        this.imgMagnitude = this.p.sqrt(imgMagnitudeSquared);
+        this.realMagnitude = this.p.sqrt(1 - imgMagnitudeSquared);
+
+        // get current angle
+        let theta = this.p.atan2(this.realY, this.realX);
+        console.log(theta);
+
+        // calculate new values
+        this.realX = this.p.cos(theta) * this.realMagnitude;
+        this.realY = this.p.sin(theta) * this.realMagnitude;
+
+        // TODO, figure out theta src...
+        /*let theta = this.p.atan2(
+          this.p.mouseY - this.centerY,
+          this.p.mouseX - this.centerX
+        );
+
+        let ux = this.p.cos(theta);
+        let uy = this.p.sin(theta);
+
+        this.realX = ux * this.realMagnitude;
+        this.realY = uy * this.realMagnitude;*/
+      }
+    }
+
+    else {
+      console.log("use all slider values");
+      // get values from slider
+      this.realX = this.realXSlider.getValue();
+      this.realY = this.realYSlider.getValue();
+      this.imgX = this.imgXSlider.getValue();
+      this.imgY = this.imgYSlider.getValue();
+
+      this.realMagnitude = this.calculateRealMagnitude();  // TODO, move assignment to calculate function ??
+      this.imgMagnitude = this.calculateImaginaryMagnitude();
+    }
 
     //
     this.updateMiscellanea();
@@ -344,8 +539,10 @@ class UnitCircle {
        have been set via a call to`setFromKet`
     */
 
-    this.realMagnitude = this.p.sqrt(this.p.sq(this.realX) + this.p.sq(this.realY));
-    this.imgMagnitude = this.p.sqrt(this.p.sq(this.imgX) + sthis.p.q(this.imgY));
+    this.realMagnitude = this.calculateRealMagnitude();
+    this.imgMagnitude = this.calculateImaginaryMagnitude();
+
+    // TODO, would need to propogate change to sliders
 
     //
     this.updateMiscellanea();
@@ -367,6 +564,24 @@ class UnitCircle {
     this.imgPointY += this.centerY;
     this.pointLabelX += this.centerX;
     this.pointLabelY += this.centerY;
+
+    // TODO
+    this.realXSlider.setTopLeft(
+      this.sliderBaseX + this.centerX,
+      this.realXSliderYPos + this.centerY
+    )
+    this.imgXSlider.setTopLeft(
+      this.sliderBaseX + this.centerX,
+      this.imgXSliderYPos + this.centerY
+    )
+    this.realYSlider.setTopLeft(
+      this.sliderBaseX + this.centerX,
+      this.realYSliderYPos + this.centerY
+    )
+    this.imgYSlider.setTopLeft(
+      this.sliderBaseX + this.centerX,
+      this.imgYSliderYPos + this.centerY
+    )
   }
 
 
@@ -386,10 +601,7 @@ class UnitCircle {
     return distanceToPoint <= closeEnough;
   }
 
-
-  // ----------------------------------------------
-
-  mouseMovedHandler () {
+  mouseMovedHandler_draggablePoints () {
 
     // real point
     if (this.mouseIsCloseToPoint(this.pointX, this.pointY, this.pointRadius)) {
@@ -414,7 +626,7 @@ class UnitCircle {
     }
   }
 
-  mousePressedHandler () {
+  mousePressedHandler_draggablePoints () {
     if (this.pointIsHovered) {
       this.pointIsSelected = true;
       // this.p.noCursor();
@@ -425,13 +637,13 @@ class UnitCircle {
     }
   }
 
-  mouseReleasedHandler () {
+  mouseReleasedHandler_draggablePoints () {
     this.pointIsSelected = false;
     this.imgPointIsSelected = false;
     // this.p.cursor();
   }
 
-  mouseDraggedHandler () {
+  mouseDraggedHandler_draggablePoints () {
     if (this.pointIsSelected) {
       this.updateValuesUsingMouse(true);
     }
@@ -443,51 +655,130 @@ class UnitCircle {
 
   // ----------------------------------------------
 
-  drawCircle () {
-    this.p.noFill();
-    this.p.strokeWeight(1);
+  mouseMovedHandler_sliders () {
+    if (!this.showSliders) return;
 
+    this.realXSlider.mouseMovedHandler();
+    this.imgXSlider.mouseMovedHandler();
+    this.realYSlider.mouseMovedHandler();
+    this.imgYSlider.mouseMovedHandler();
+  }
+
+  mousePressedHandler_sliders () {
+    if (!this.showSliders) return;
+
+    this.realXSlider.mousePressedHandler();
+    this.imgXSlider.mousePressedHandler();
+    this.realYSlider.mousePressedHandler();
+    this.imgYSlider.mousePressedHandler();
+  }
+
+  mouseReleasedHandler_sliders () {
+    if (!this.showSliders) return;
+
+    this.realXSlider.mouseReleasedHandler();
+    this.imgXSlider.mouseReleasedHandler();
+    this.realYSlider.mouseReleasedHandler();
+    this.imgYSlider.mouseReleasedHandler();
+  }
+
+  mouseDraggedHandler_sliders () {
+    if (!this.showSliders) return;
+
+    this.realXSlider.mouseDraggedHandler();
+    this.imgXSlider.mouseDraggedHandler();
+    this.realYSlider.mouseDraggedHandler();
+    this.imgYSlider.mouseDraggedHandler();
+
+    // Hmm...
+    if (
+      this.realXSlider.knobIsSelected ||
+      this.imgXSlider.knobIsSelected ||
+      this.realYSlider.knobIsSelected ||
+      this.imgYSlider.knobIsSelected
+    ) {
+      this.updateValuesUsingSliders();
+    }
+  }
+
+
+  // ----------------------------------------------
+
+  mouseMovedHandler () {
+    this.mouseMovedHandler_draggablePoints();
+    this.mouseMovedHandler_sliders();
+  }
+
+  mousePressedHandler () {
+    this.mousePressedHandler_draggablePoints();
+    this.mousePressedHandler_sliders();
+  }
+
+  mouseReleasedHandler () {
+    this.mouseReleasedHandler_draggablePoints();
+    this.mouseReleasedHandler_sliders();
+  }
+
+  mouseDraggedHandler () {
+    this.mouseDraggedHandler_draggablePoints();
+    this.mouseDraggedHandler_sliders();
+  }
+
+
+  // ----------------------------------------------
+
+  // unit circle (real = 1 and img = 0, or vice versa)
+  drawUnitCircle () {
     if (this.renderAsComplexCircle) {
-      // unit circle (real = 1 and img = 0, or vice versa)
-      this.p.stroke(this.unitCircleColor);
-      this.p.circle(this.centerX, this.centerY, this.circleWidth);
-
-      // imaginary circle
-      if (this.showImaginaryCircle) {
-        this.p.stroke(this.imgCircleColor);
-        this.p.circle(this.centerX, this.centerY, this.circleWidth * this.imgMagnitude);
+      if (this.isUnitary()) {
+        this.p.stroke(this.unitCircleColor);
       }
+      else {
+        this.p.stroke(this.errorColor);
+      }
+      this.p.strokeWeight(1);
+      this.p.noFill();
+      this.p.circle(this.centerX, this.centerY, this.circleWidth);
+    }
+  }
 
-      // real circle
-      this.p.stroke(this.realCircleColor);
-      this.p.circle(this.centerX, this.centerY, this.circleWidth * this.realMagnitude);
+  drawRealCircle () {
+    this.p.stroke(this.realCircleColor);
+    this.p.strokeWeight(this.realCircleThickness);
+    this.p.noFill();
+    this.p.circle(this.centerX, this.centerY, this.circleWidth * this.realMagnitude);
+  }
+
+  drawImaginaryCircle () {
+    if (this.renderAsComplexCircle && this.showImaginaryCircle) {
+      this.p.stroke(this.imgCircleColor);
+      this.p.strokeWeight(this.imgCircleThickness);
+      this.p.noFill();
+      this.p.circle(this.centerX, this.centerY, this.circleWidth * this.imgMagnitude);
+    }
+  }
+
+  drawRealPoint () {
+    // draw line to point
+    this.p.strokeWeight(this.vectorThickness);
+    this.p.stroke(this.vectorColor);
+    this.p.line(this.centerX, this.centerY, this.pointX, this.pointY);
+
+    // draw point
+    let d;
+    if (this.pointIsHovered || this.pointIsSelected) {
+      this.p.fill(this.pointColorHovered);
+      d = this.pointDiameterHovered;
     }
     else {
-      // real circle
-      this.p.stroke(this.realCircleColor);
-      this.p.circle(this.centerX, this.centerY, this.circleWidth * this.realMagnitude);
+      this.p.fill(this.pointColor);
+      d = this.pointDiameter;
     }
+    this.p.noStroke();
+    this.p.circle(this.pointX, this.pointY, d);
   }
 
-  drawAxisProjections () {
-    // Imaginary
-    if (this.renderAsComplexCircle && this.showImaginaryCircle) {
-      this.p.stroke(this.imgProjectionXColor);
-      this.p.line(this.imgPointX, this.imgPointY, this.imgPointX, this.centerY);
-      this.p.stroke(this.imgProjectionYColor);
-      this.p.line(this.imgPointX, this.imgPointY, this.centerX, this.imgPointY);
-    }
-
-    // Real
-    this.p.strokeWeight(1);
-    this.p.stroke(this.realProjectionXColor);
-    this.p.line(this.pointX, this.pointY, this.pointX, this.centerY);
-    this.p.stroke(this.realProjectionYColor);
-    this.p.line(this.pointX, this.pointY, this.centerX, this.pointY);
-  }
-
-  drawPoint () {
-    // Imaginary
+  drawImaginaryPoint () {
     if (this.renderAsComplexCircle && this.showImaginaryCircle)
     {
       // draw line to point
@@ -508,30 +799,11 @@ class UnitCircle {
       this.p.noStroke();
       this.p.circle(this.imgPointX, this.imgPointY, d);
     }
-
-    // Real
-    {
-      // draw line to point
-      this.p.strokeWeight(this.vectorThickness);
-      this.p.stroke(this.vectorColor);
-      this.p.line(this.centerX, this.centerY, this.pointX, this.pointY);
-
-      // draw point
-      let d;
-      if (this.pointIsHovered || this.pointIsSelected) {
-        this.p.fill(this.pointColorHovered);
-        d = this.pointDiameterHovered;
-      }
-      else {
-        this.p.fill(this.pointColor);
-        d = this.pointDiameter;
-      }
-      this.p.noStroke();
-      this.p.circle(this.pointX, this.pointY, d);
-    }
   }
 
   drawPointLabel () {
+    if (!this.showLabel) return;
+
     this.p.noStroke();
     this.p.textFont("monospace");
     this.p.textSize(this.pointLabelTextSize);
@@ -548,8 +820,8 @@ class UnitCircle {
     let realXText = roundAtMost(this.realX, 2);
     let imgXText = roundAtMost(this.imgX, 2);
     // TODO, p5 y-axis thing
-    let realYText = roundAtMost(- this.realY, 2);  // display cartesian y-direction
-    let imgYText = roundAtMost(- this.imgY, 2);  // display cartesian y-direction
+    let realYText = roundAtMost(-this.realY, 2);  // display cartesian y-direction
+    let imgYText = roundAtMost(-this.imgY, 2);  // display cartesian y-direction
 
     // TODO, add simplified case
     // if (this.showComplexLabel) {}
@@ -558,12 +830,14 @@ class UnitCircle {
     {
       this.p.fill(this.pointLabelBaseColor);
       this.p.text(
-        `(${realXText} + ${imgXText}i) ∣0⟩ + (${realYText} + ${imgYText}i) ∣1⟩`,
+        `(${realXText} + ${imgXText}i)∣0⟩ + (${realYText} + ${imgYText}i)∣1⟩`,
+        // `【${realXText} + ${imgXText}i】∣0⟩ + 【${realYText} + ${imgYText}i】∣1⟩`,
         this.pointLabelX, this.pointLabelY
       );
     }
 
-    if (this.showUnitaryProof) {
+    // Show whether sum of squares equals 1
+    if (this.showNormalizedProof) {
 
       // equation
       this.p.fill(this.pointLabelSecondaryColor);
@@ -582,7 +856,7 @@ class UnitCircle {
       }
       else {
         symbol = "≠";
-        this.p.fill(this.pointLabelErrorColor);
+        this.p.fill(this.errorColor);
       }
 
       y += this.pointLabelTextSize * 1.4;
@@ -618,21 +892,52 @@ class UnitCircle {
     }
   }
 
-  drawImaginarySliders () {
-    // ...
+  drawRealAxisProjections () {
+    if (!this.showAxisProjections) return;
+
+    this.p.strokeWeight(1);
+    this.p.stroke(this.realProjectionXColor);
+    this.p.line(this.pointX, this.pointY, this.pointX, this.centerY);
+    this.p.stroke(this.realProjectionYColor);
+    this.p.line(this.pointX, this.pointY, this.centerX, this.pointY);
+  }
+
+  drawImaginaryAxisProjections () {
+    if (!this.showAxisProjections) return;
+
+    if (this.renderAsComplexCircle && this.showImaginaryCircle) {
+      this.p.strokeWeight(1);
+      this.p.stroke(this.imgProjectionXColor);
+      this.p.line(this.imgPointX, this.imgPointY, this.imgPointX, this.centerY);
+      this.p.stroke(this.imgProjectionYColor);
+      this.p.line(this.imgPointX, this.imgPointY, this.centerX, this.imgPointY);
+    }
+  }
+
+  drawSliders () {
+    if (!this.showSliders) return;
+
+    this.realXSlider.render();
+    this.imgXSlider.render();
+    this.realYSlider.render();
+    this.imgYSlider.render();
   }
 
   render () {
-    this.drawCircle();
+    // this.drawCircle();
 
-    if (this.showAxisProjections) {
-      this.drawAxisProjections();
-    }
+    this.drawUnitCircle();
 
-    this.drawPoint();
+    this.drawImaginaryCircle();
+    this.drawImaginaryAxisProjections();
+    this.drawImaginaryPoint();
 
-    if (this.showLabel) {
-      this.drawPointLabel();
-    }
+    this.drawRealCircle();
+    this.drawRealAxisProjections();
+    this.drawRealPoint();
+
+    this.drawPointLabel();
+
+    this.drawSliders();
   }
 }

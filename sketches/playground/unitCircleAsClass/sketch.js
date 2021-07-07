@@ -9,6 +9,8 @@ let sketch = function (p) {
 
     c = new UnitCircle(p);
     c.setCenter(p.width / 2, p.height / 2);
+
+    c.showNormalizedProof = true;
   }
 
   p.draw = function () {

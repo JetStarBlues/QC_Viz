@@ -7,9 +7,16 @@ let sketch = function (p) {
 
     s = new Slider(
       p,
-      50, 50, 200, 50,
-      0, 1, 0.5, 0.1
-      );
+      50, 50,
+      // 200, 50, 50 * 2,
+      200, 10, 10 * 2,
+      // 0, 1
+      0, 1, 0.1
+      // 0, 1, 0.5, 0.1
+    );
+
+    s.setLabel("pots:");
+    s.showLabel = true;
   }
 
   p.draw = function () {

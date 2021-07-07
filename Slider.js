@@ -1,10 +1,11 @@
 /* Based on:
     - https://processing.org/examples/scrollbar.html
-    - https://www.khanacademy.org/cs/a/6032791229661184
 */
 
 /* TODO
    - resize
+   - add labels
+   - close enought UI thing
 */
 
 /*
@@ -17,6 +18,7 @@ class Slider {
   constructor (
     p,
     barXPos, barYPos, barWidth, barHeight,
+    knobWidth,
     minValue, maxValue, initialValue, step
   ) {
 
@@ -25,24 +27,68 @@ class Slider {
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
-    // Value range slider represents
+    // Configure display
+    this.showLabel = false;
+    this.roundEdges = true;
+
+
+    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+    // values slider represents
     this.minValue = minValue;
     this.maxValue = maxValue;
     this.step = step;  // optional (also not currently implemented)
 
-    // size and position of the bar
+    // size and position of bar
     this.barWidth  = barWidth;
     this.barHeight = barHeight;
     this.barXPos   = barXPos;
     this.barYPos   = barYPos;
 
+    // size of knob
+    this.knobWidth = knobWidth;
+
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
+    // ...
+    this.calculateDimensions();
+
+    // set slider value
+    if (initialValue != null) {
+      this.setValue(initialValue);
+    }
+    else {
+      // initialize at center of bar
+      this.setValueAsPercent(0.5);
+    }
+
+
+    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+    // knob state
+    this.knobIsHovered = false;
+    this.knobIsSelected = false;
+
+
+    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+    // label
+    this.label = null;
+
+
+    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+    this.barColor = this.p.color(204);
+    this.barValueColor = this.p.color(255, 170, 170);
+    this.knobColor = this.p.color(102);
+    this.knobColorHovered = this.p.color(0);
+    this.labelColor = this.p.color(0);
+  }
+
+  calculateDimensions (currentValue) {
     // size of knob
-    this.knobWidth = this.barHeight;
-    // this.knobHeight = this.barHeight;
-    this.knobHeight = this.barHeight * 0.6;
+    this.knobHeight = this.barHeight;
     this.knobHalfWidth = this.knobWidth / 2;
 
     // min and max values of knob
@@ -50,27 +96,10 @@ class Slider {
     this.knobXPosMax = this.barXPos + this.barWidth - this.knobWidth;
 
     // position of knob
-    this.knobXPos = 0;
-    if (initialValue != null) {
-      this.setValue(initialValue);
-    }
-    else {
-      // initialize at center of bar
-      this.knobXPos = this.barXPos + (this.barWidth - this.knobWidth) / 2;
-    }
     this.knobYPos = this.barYPos;
-
-    //
-    this.knobIsHovered = false;
-    this.knobIsSelected = false;
-
-
-    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
-    //
-    this.barColor = this.p.color(204);
-    this.knobColor = this.p.color(102);
-    this.knobColorHovered = this.p.color(0);
+    if (currentValue != null) {
+      this.setValue(currentValue);
+    }
   }
 
 
@@ -123,19 +152,53 @@ class Slider {
     );
   }
 
+  setValueAsPercent (pct) {
+    this.knobXPos = this.barXPos + (this.barWidth - this.knobWidth) * pct;
+  }
+
 
   // ----------------------------------------------
 
-  setSize (barWidth, barHeight) {
-    //
+  setLabel (labelText) {
+    this.label = labelText;
   }
 
-  setKnobSize (knobWidth, knobHeight) {
-    //
+
+  // ----------------------------------------------
+
+  setSize (barWidth, barHeight, knobWidth) {
+    // Save current value
+    let currentValue = this.getValue();
+
+    // Update dimensions
+    if (barWidth != null) {
+      this.barWidth = barWidth;
+    }
+    if (barHeight != null) {
+      this.barHeight = barHeight;
+    }
+    if (knobWidth != null) {
+      this.knobWidth = knobWidth;
+    }
+
+    // Update dependent values
+    this.calculateDimensions(currentValue);
   }
 
   setTopLeft (barXPos, barYPos) {
-    //
+    // Save current value
+    let currentValue = this.getValue();
+
+    // Update position
+    if (barXPos != null) {
+      this.barXPos = barXPos;
+    }
+    if (barYPos != null) {
+      this.barYPos = barYPos;
+    }
+
+    // Update dependent values
+    this.calculateDimensions(currentValue);
   }
 
 
@@ -148,7 +211,7 @@ class Slider {
       this.knobXPosMin, this.knobXPosMax
     );
 
-    console.log(this.getValue());
+    // console.log(this.getValue());
 
     /*
       "Snap" according to `this.step`.
@@ -215,21 +278,28 @@ class Slider {
   // ----------------------------------------------
 
   render () {
+    //
+    let radius = this.roundEdges ? this.barHeight * 0.5 : 0;
+
     // Draw bar
+    this.p.rectMode(this.p.CORNERS);
+
+    let knobCenterX = this.knobXPos + (this.knobWidth / 2);
+    let barBottomY = this.barYPos + this.barHeight;
+
     this.p.noStroke();
+    this.p.fill(this.barValueColor);
+    this.p.rect(
+      this.barXPos, this.barYPos, knobCenterX, barBottomY,
+      radius, 0, 0, radius
+    );
     this.p.fill(this.barColor);
-    this.p.rect(this.barXPos, this.barYPos, this.barWidth, this.barHeight);
+    this.p.rect(
+      knobCenterX, this.barYPos, this.barXPos + this.barWidth, barBottomY,
+      0, radius, radius, 0
+    );
 
-    this.p.stroke(255,0,0);
-    let x = this.barXPos + (this.barWidth / 2);
-    this.p.line(x, this.barYPos, x, this.barYPos + this.barHeight);
-
-    this.p.stroke(0,255,0);
-    for (let i = 0; i < 5; i += 1 ) {
-      x = this.barXPos + (this.barWidth / 5 * i);
-      this.p.line(x, this.barYPos, x, this.barYPos + this.barHeight);
-    }
-    this.p.noStroke();
+    this.p.rectMode(this.p.CORNER);  // restore default
 
     // Draw knob
     if (this.knobIsHovered || this.knobIsSelected) {
@@ -238,10 +308,27 @@ class Slider {
     else {
       this.p.fill(this.knobColor);
     }
-    this.p.rect(this.knobXPos, this.knobYPos, this.knobWidth, this.knobHeight);
+    this.p.rect(
+      this.knobXPos, this.knobYPos, this.knobWidth, this.knobHeight,
+      radius
+    );
 
-    this.p.stroke(0,0,255);
-    x = this.knobXPos + (this.knobWidth / 2);
-    this.p.line(x, this.knobYPos, x, this.knobYPos + this.knobHeight);
+    // Draw label
+    if (this.showLabel && (this.label != null)) {
+      /* Not general purpose...
+         - sets textSize to barHeight
+         - places text to left of bar, centered vertically
+      */
+      this.p.textFont("monospace");
+      this.p.textSize(this.barHeight * 1.1);
+      this.p.noStroke();
+      this.p.fill(this.labelColor);
+      this.p.textAlign(this.p.RIGHT, this.p.CENTER);
+      this.p.text(
+        this.label,
+        this.barXPos - 5,  // a bit of breathing space
+        this.barYPos + (this.barHeight / 2)  // center Y
+      );
+    }
   }
 }
