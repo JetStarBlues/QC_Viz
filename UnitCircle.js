@@ -166,7 +166,7 @@ class UnitCircle {
     this.pointIsHovered = false;
     this.pointIsSelected = false;
     this.pointDiameter = 10;  // TODO, make resizable
-    this.pointDiameterHovered = this.pointDiameter * 1.3;
+    this.pointHoveredDiameter = this.pointDiameter * 1.3;
     this.pointRadius = this.pointDiameter / 2;
 
     // line thickness
@@ -186,7 +186,7 @@ class UnitCircle {
     this.imgPointIsHovered = false;
     this.imgPointIsSelected = false;
     this.imgPointDiameter = this.pointDiameter * 0.8;
-    this.imgPointDiameterHovered = this.imgPointDiameter * 1.3;
+    this.imgPointHoveredDiameter = this.imgPointDiameter * 1.3;
     this.imgPointRadius = this.imgPointDiameter / 2;
 
     // line thickness
@@ -265,65 +265,26 @@ class UnitCircle {
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
     this.realCircleColor = this.p.color(0);
-    this.unitCircleColor = this.p.color(colors["unitCircle0"]);
-    this.imgCircleColor = this.p.color(colors["imgCircle0"]);  // TODO, change me
+    this.unitCircleColor = this.p.color(colors["pal1col2"]);
+    this.imgCircleColor = this.p.color(colors["pal1col1"]);
 
     this.vectorColor = this.p.color(0);
-    this.imgVectorColor = this.p.color(colors["imgCircle0"]);  // TODO, change me
+    this.imgVectorColor = this.p.color(colors["pal1col1"]);
 
     this.pointColor = this.p.color(0);
-    this.pointColorHovered = this.p.color(colors["point0"]);
-    this.imgPointColor = this.p.color(colors["imgCircle0"]);  // TODO, change me
-    this.imgPointColorHovered = this.p.color(colors["imgPoint0"]);
+    this.pointHoveredColor = this.p.color(colors["pal0col1"]);
+    this.imgPointColor = this.p.color(colors["pal1col1"]);
+    this.imgPointHoveredColor = this.p.color(colors["pal0col4"]);
 
     this.pointLabelBaseColor = this.p.color(0);
-    this.pointLabelSecondaryColor = this.p.color(colors["pointLabel0"]);
+    this.pointLabelSecondaryColor = this.p.color(colors["pal0col3"]);
 
-    this.errorColor = this.p.color(colors["error0"]);  // TODO, change me
+    this.errorColor = this.p.color(colors["pal0col1"]);
 
     this.realProjectionXColor = this.p.color(0);
     this.realProjectionYColor = this.p.color(0);
-    this.imgProjectionXColor = this.p.color(colors["imgCircle0"]);  // TODO, change me
-    this.imgProjectionYColor = this.p.color(colors["imgCircle0"]);  // TODO, change me
-
-    // TODO
-    this.sliderBarColor = this.p.color(colors["sliderBar0"]);
-    this.sliderLabelColor = this.p.color(0);
-
-    // this.realSliderBarValueColor = this.p.color(0);  // ugh
-    this.realSliderBarValueColor = this.p.color(colors["sliderBarValue0"]);
-    this.realSliderKnobColor = this.p.color(colors["sliderKnob0"]);
-    this.realSliderKnobHoveredColor = this.p.color(colors["sliderKnobHovered0"]);
-
-    // this.imgSliderBarValueColor = this.p.color(colors["imgCircle0"]);
-    this.imgSliderBarValueColor = this.p.color(colors["sliderBarValue0"]);
-    // this.imgSliderKnobColor = this.p.color(colors["imgPoint0"]);
-    this.imgSliderKnobColor = this.p.color(colors["sliderKnob0"]);
-    this.imgSliderKnobHoveredColor = this.p.color(colors["sliderKnobHovered0"]);
-
-    this.realXSlider.barColor = this.sliderBarColor;
-    this.realXSlider.barValueColor = this.realSliderBarValueColor;
-    this.realXSlider.knobColor = this.realSliderKnobColor;
-    this.realXSlider.knobColorHovered = this.realSliderKnobHoveredColor;
-    this.realXSlider.labelColor = this.sliderLabelColor;
-
-    this.realYSlider.barColor = this.sliderBarColor;
-    this.realYSlider.barValueColor = this.realSliderBarValueColor;
-    this.realYSlider.knobColor = this.realSliderKnobColor;
-    this.realYSlider.knobColorHovered = this.realSliderKnobHoveredColor;
-    this.realYSlider.labelColor = this.sliderLabelColor;
-
-    this.imgXSlider.barColor = this.sliderBarColor;
-    this.imgXSlider.barValueColor = this.imgSliderBarValueColor;
-    this.imgXSlider.knobColor = this.imgSliderKnobColor;
-    this.imgXSlider.knobColorHovered = this.imgSliderKnobHoveredColor;
-    this.imgXSlider.labelColor = this.sliderLabelColor;
-
-    this.imgYSlider.barColor = this.sliderBarColor;
-    this.imgYSlider.barValueColor = this.imgSliderBarValueColor;
-    this.imgYSlider.knobColor = this.imgSliderKnobColor;
-    this.imgYSlider.knobColorHovered = this.imgSliderKnobHoveredColor;
-    this.imgYSlider.labelColor = this.sliderLabelColor;
+    this.imgProjectionXColor = this.p.color(colors["pal1col1"]);
+    this.imgProjectionYColor = this.p.color(colors["pal1col1"]);
   }
 
 
@@ -396,7 +357,7 @@ class UnitCircle {
     /*if (newCircleWidth < this.baseCircleWidth * 0.5)
     {
       this.pointDiameter = 6;
-      this.pointDiameterHovered = this.pointDiameter * 1.3;
+      this.pointHoveredDiameter = this.pointDiameter * 1.3;
       this.pointRadius = this.pointDiameter / 2;
       this.imgPointDiameter = this.pointDiameter * 0.8;
 
@@ -767,8 +728,8 @@ class UnitCircle {
     // draw point
     let d;
     if (this.pointIsHovered || this.pointIsSelected) {
-      this.p.fill(this.pointColorHovered);
-      d = this.pointDiameterHovered;
+      this.p.fill(this.pointHoveredColor);
+      d = this.pointHoveredDiameter;
     }
     else {
       this.p.fill(this.pointColor);
@@ -789,8 +750,8 @@ class UnitCircle {
       // draw point
       let d;
       if (this.imgPointIsHovered || this.imgPointIsSelected) {
-        this.p.fill(this.imgPointColorHovered);
-        d = this.imgPointDiameterHovered;
+        this.p.fill(this.imgPointHoveredColor);
+        d = this.imgPointHoveredDiameter;
       }
       else {
         this.p.fill(this.imgPointColor);

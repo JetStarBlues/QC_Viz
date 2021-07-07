@@ -79,10 +79,16 @@ class Slider {
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
-    this.barColor = this.p.color(204);
-    this.barValueColor = this.p.color(255, 170, 170);
-    this.knobColor = this.p.color(102);
-    this.knobColorHovered = this.p.color(0);
+    // this.barColor = this.p.color(204);
+    // this.barValueColor = this.p.color(255, 170, 170);
+    // this.knobColor = this.p.color(102);
+    // this.knobHoveredColor = this.p.color(0);
+    // this.labelColor = this.p.color(0);
+
+    this.barColor = this.p.color(colors["pal0col0"]);
+    this.barValueColor = this.p.color(colors["pal0col1"]);
+    this.knobColor = this.p.color(colors["pal0col4"]);
+    this.knobHoveredColor = this.p.color(colors["pal0col3"]);
     this.labelColor = this.p.color(0);
   }
 
@@ -303,7 +309,7 @@ class Slider {
 
     // Draw knob
     if (this.knobIsHovered || this.knobIsSelected) {
-      this.p.fill(this.knobColorHovered);
+      this.p.fill(this.knobHoveredColor);
     }
     else {
       this.p.fill(this.knobColor);

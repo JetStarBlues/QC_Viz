@@ -3,31 +3,19 @@
    - www.colourlovers.com/palette/1597233/500_honies
 */
 
-/*
-  TODO,
-  - At some point come up with better naming system.
-    - Currently not sure if names should correspond to use
-      - easier to read
-    - Or correspond to colors (ex `pal1color0`)
-      - avoids color repetition
-      - easier to swap color schemes
-*/
-
 colors = {
 
-  "background0" : [253, 241, 204],
+  // www.colourlovers.com/palette/1811244/1001_Stories
+  "pal0col0" : [248, 177, 149],  // peach
+  "pal0col1" : [246, 114, 128],  // pink
+  "pal0col2" : [192, 108, 132],  // purple-pink
+  "pal0col3" : [108, 91, 123],  // purple-blue
+  "pal0col4" : [53, 92, 125],  // blue
 
-  "point0" : [246, 114, 128],
-  "imgPoint0" : [53, 92, 125],
-
-  "pointLabel0" : [108, 91, 123],
-  "error0" : [246, 114, 128],
-
-  "unitCircle0" : [152, 127, 105],
-  "imgCircle0" : [198, 214, 184],
-
-  "sliderBar0" : [248,177,149],
-  "sliderBarValue0" : [246, 114, 128],
-  "sliderKnob0" : [53,92,125],
-  "sliderKnobHovered0" : [108,91,123],
+  // www.colourlovers.com/palette/1597233/500_honies
+  "pal1col0" : [253, 241, 204],  // khaki
+  "pal1col1" : [198, 214, 184],  // olive
+  "pal1col2" : [152, 127, 105],  // brown
+  "pal1col3" : [227, 173, 64],  // dark yellow
+  "pal1col4" : [252, 208, 54],  // yellow
 };

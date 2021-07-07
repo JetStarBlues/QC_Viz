@@ -15,7 +15,7 @@ let sketch = function (p) {
 
   p.draw = function () {
     // p.background(220);
-    p.background(colors["background0"]);
+    p.background(colors["pal1col0"]);
 
     c.render();
 
