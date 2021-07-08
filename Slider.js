@@ -2,15 +2,9 @@
     - https://processing.org/examples/scrollbar.html
 */
 
-/* TODO
-   - resize
-   - add labels
-   - close enought UI thing
-*/
-
 /*
-  Preliminary work on supporting `step`.
-  For now, on-hold until use case arises.
+  TODO
+   - step
 */
 
 class Slider {

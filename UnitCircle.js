@@ -6,6 +6,15 @@
       - case for step e.g. if aiming for exactly 0.6 and 0.8
     - do we want button or something that locks
       - e.g. if adjust real, imaginary auto calculated to make 1?
+      - TODO, this is kinda clunky atm
+        - if change realX, what does someone intuitively expect
+          to change to make unitary (realY, imgX, imgY)??
+          - currently imgX and imgY change which feels odd
+        - If this will be primary mode to use circle, ideal
+          to figure this out
+        - Also it feels like sliders should reposition based on mode?
+          - i.e. realX, imgX, realY, imgY if no auto
+          - realX, realY, imgX, imgY if auto...
 
   - Better way to handle flipped p5 y-axis
     - Think a bit about how the y-axis direction thing
@@ -70,7 +79,7 @@ class UnitCircle {
     this.showAxisProjections = false;
 
     this.showSliders = true;
-    this.autoNormalizeSliders = false;  // hmm...
+    this.autoNormalizeSliders = true;  // hmm...
 
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
@@ -299,6 +308,7 @@ class UnitCircle {
 
   // ----------------------------------------------
 
+  // TODO, move `this.realMagnitude` assignment to inside function ??
   calculateRealMagnitude () {
     return this.p.sqrt(this.p.sq(this.realX) + this.p.sq(this.realY));
   }
@@ -310,23 +320,26 @@ class UnitCircle {
 
   // ----------------------------------------------
 
-  setCenter (x, y) {
-    this.centerX = x;
-    this.centerY = y;
-
-    // Hmm...
-    this.updateMiscellanea();
-  }
-
-
-  // ----------------------------------------------
-
   isUnitary () {
     return compareFloat(
       1,
       this.p.sq(this.realX) + this.p.sq(this.imgX) +
       this.p.sq(this.realY) + this.p.sq(this.imgY)
     );
+  }
+
+
+  // ----------------------------------------------
+
+  setCenter (x, y) {
+    this.centerX = x;
+    this.centerY = y;
+
+    //
+    this.updateSliderPositions();
+
+    //
+    this.updateMiscellanea();
   }
 
 
@@ -389,14 +402,43 @@ class UnitCircle {
     this.realYSliderYPos = this.sliderBaseY + (this.sliderSpacing * 2);
     this.imgYSliderYPos = this.sliderBaseY + (this.sliderSpacing * 3);
 
-    this.realXSlider.setTopLeft(null, this.realXSliderYPos);
-    this.realYSlider.setTopLeft(null, this.imgXSliderYPos);
-    this.imgXSlider.setTopLeft(null, this.realYSliderYPos);
-    this.imgYSlider.setTopLeft(null, this.imgYSliderYPos);
+    this.updateSliderPositions();
 
 
     //
     this.updateMiscellanea();
+  }
+
+
+  // ----------------------------------------------
+
+  updateRealSliderValues () {
+    this.realXSlider.setValue(this.realX);
+    this.realYSlider.setValue(this.realY);  // TODO, the p5 y thing =/
+  }
+
+  updateImaginarySliderValues () {
+    this.imgXSlider.setValue(this.imgX);
+    this.imgYSlider.setValue(this.imgY);  // TODO, the p5 y thing =/
+  }
+
+  updateSliderPositions () {
+    this.realXSlider.setTopLeft(
+      this.sliderBaseX + this.centerX,
+      this.realXSliderYPos + this.centerY
+    )
+    this.imgXSlider.setTopLeft(
+      this.sliderBaseX + this.centerX,
+      this.imgXSliderYPos + this.centerY
+    )
+    this.realYSlider.setTopLeft(
+      this.sliderBaseX + this.centerX,
+      this.realYSliderYPos + this.centerY
+    )
+    this.imgYSlider.setTopLeft(
+      this.sliderBaseX + this.centerX,
+      this.imgYSliderYPos + this.centerY
+    )
   }
 
 
@@ -420,16 +462,14 @@ class UnitCircle {
       this.realY = uy * this.realMagnitude;
 
       // propogate change to sliders
-      this.realXSlider.setValue(this.realX);
-      this.realYSlider.setValue(this.realY);  // TODO, the p5 y thing =/
+      this.updateRealSliderValues();
     }
     else {
       this.imgX = ux * this.imgMagnitude;
       this.imgY = uy * this.imgMagnitude;
 
       // propogate change to sliders
-      this.imgXSlider.setValue(this.imgX);
-      this.imgYSlider.setValue(this.imgY);  // TODO, the p5 y thing =/
+      this.updateImaginarySliderValues();
     }
 
     //
@@ -441,17 +481,11 @@ class UnitCircle {
        have *just* been set with sliders
     */
 
-// TODO
-
-// TODO, handle locking/auto
+    // TODO, auto normalize...
 
     /* If user sets real sliders, imaginary values are auto-computed
        to create normalized vector.
-       And vice versa if user sets imaginary sliders
-    */
-    /* TODO
-       Should we constrain autogen values to -1..1
-       - would mean some cases not normalized...
+       And vice versa if user sets imaginary sliders.
     */
     if (this.autoNormalizeSliders) {
 
@@ -464,16 +498,36 @@ class UnitCircle {
 
         // calculate magnitudes
         let realMagnitudeSquared = this.p.sq(this.realX) + this.p.sq(this.realY);
+        // console.log(`realMagSq: ${realMagnitudeSquared}`);
+
+        /*
+          TODO
+          compareFloat?
+          or will slider step resolve...
+          if rsq == 1 within epsilon set to 1
+
+          i.e. treat `1.0000000000000002` as 1
+        */
+
+        /* Cannot take sqrt of negative number.
+           Unable to auto normalize.
+        */
+        if (realMagnitudeSquared > 1) {
+          console.log("abort, negative sqrt");
+          return;
+        }
         this.realMagnitude = this.p.sqrt(realMagnitudeSquared);
         this.imgMagnitude = this.p.sqrt(1 - realMagnitudeSquared);
 
         // get current angle
         let theta = this.p.atan2(this.imgY, this.imgX);
-        console.log(this.imgY, this.imgX, theta);
 
         // calculate new values
         this.imgX = this.p.cos(theta) * this.imgMagnitude;
         this.imgY = this.p.sin(theta) * this.imgMagnitude;
+
+        // propogate change to sliders
+        this.updateImaginarySliderValues();
       }
 
       // user set imaginary, auto set real
@@ -485,16 +539,22 @@ class UnitCircle {
 
         // calculate magnitudes
         let imgMagnitudeSquared = this.p.sq(this.imgX) + this.p.sq(this.imgY);
+        if (imgMagnitudeSquared > 1) {
+          console.log("abort, negative sqrt");
+          return;
+        }
         this.imgMagnitude = this.p.sqrt(imgMagnitudeSquared);
         this.realMagnitude = this.p.sqrt(1 - imgMagnitudeSquared);
 
         // get current angle
         let theta = this.p.atan2(this.realY, this.realX);
-        console.log(theta);
 
         // calculate new values
         this.realX = this.p.cos(theta) * this.realMagnitude;
         this.realY = this.p.sin(theta) * this.realMagnitude;
+
+        // propogate changes to sliders
+        this.updateRealSliderValues();
       }
     }
 
@@ -506,7 +566,7 @@ class UnitCircle {
       this.imgX = this.imgXSlider.getValue();
       this.imgY = this.imgYSlider.getValue();
 
-      this.realMagnitude = this.calculateRealMagnitude();  // TODO, move assignment to calculate function ??
+      this.realMagnitude = this.calculateRealMagnitude();
       this.imgMagnitude = this.calculateImaginaryMagnitude();
     }
 
@@ -522,7 +582,9 @@ class UnitCircle {
     this.realMagnitude = this.calculateRealMagnitude();
     this.imgMagnitude = this.calculateImaginaryMagnitude();
 
-    // TODO, would need to propogate change to sliders
+    // propogate changes to sliders
+    this.updateRealSliderValues();
+    this.updateImaginarySliderValues();
 
     //
     this.updateMiscellanea();
@@ -535,7 +597,6 @@ class UnitCircle {
     this.imgPointX = this.imgX * this.circleRadius;
     this.imgPointY = this.imgY * this.circleRadius;
 
-    // TODO, theta should probably be global (cause used many places)
     let theta = this.p.atan2(this.realY, this.realX);
     this.pointLabelX = this.pointX + (this.pointLabelOffset * this.p.cos(theta));
     this.pointLabelY = this.pointY + (this.pointLabelOffset * this.p.sin(theta));
@@ -546,24 +607,6 @@ class UnitCircle {
     this.imgPointY += this.centerY;
     this.pointLabelX += this.centerX;
     this.pointLabelY += this.centerY;
-
-    // TODO
-    this.realXSlider.setTopLeft(
-      this.sliderBaseX + this.centerX,
-      this.realXSliderYPos + this.centerY
-    )
-    this.imgXSlider.setTopLeft(
-      this.sliderBaseX + this.centerX,
-      this.imgXSliderYPos + this.centerY
-    )
-    this.realYSlider.setTopLeft(
-      this.sliderBaseX + this.centerX,
-      this.realYSliderYPos + this.centerY
-    )
-    this.imgYSlider.setTopLeft(
-      this.sliderBaseX + this.centerX,
-      this.imgYSliderYPos + this.centerY
-    )
   }
 
 
