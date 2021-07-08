@@ -32,7 +32,7 @@ class Slider {
     // values slider represents
     this.minValue = minValue;
     this.maxValue = maxValue;
-    this.step = step;  // optional (also not currently implemented)
+    this.step = step ? step : null;  // optional (also not currently implemented)
 
     // size and position of bar
     this.barWidth  = barWidth;
@@ -46,6 +46,14 @@ class Slider {
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
+    this.stepPrecison = null;
+    if (this.step != null) {
+      this.stepPrecison = countDecimals(this.step);
+    }
+
+
+    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
     // ...
     this.calculateDimensions();
 
@@ -55,7 +63,8 @@ class Slider {
     }
     else {
       // initialize at center of bar
-      this.setValueAsPercent(0.5);
+      // this.setValueAsPercent(0.5);
+      this.setValueAsPercent(0.35);
     }
 
 
@@ -84,11 +93,13 @@ class Slider {
     this.barColor = this.p.color(colors["pal0col0"]);
     this.barValueColor = this.p.color(colors["pal0col1"]);
     this.barCenterIndicatorColor = this.p.color(colors["pal0col2"]);
-    // this.barCenterIndicatorColor = this.p.color(colors["pal0col3"]);
     this.knobColor = this.p.color(colors["pal0col4"]);
     this.knobHoveredColor = this.p.color(colors["pal0col3"]);
     this.labelColor = this.p.color(0);
   }
+
+
+  // ----------------------------------------------
 
   calculateDimensions (currentValue) {
     // size of knob
@@ -104,6 +115,35 @@ class Slider {
     if (currentValue != null) {
       this.setValue(currentValue);
     }
+  }
+
+
+  // ----------------------------------------------
+
+  /*
+    E.g. if step is 0.1, then
+      0.20 becomes 0.2
+      0.23 becomes 0.2
+      0.25 becomes 0.3
+      0.27 becomes 0.3
+  */
+  roundToNearestStep (value) {
+    // Do nothing
+    if (this.step == null) {
+      return value;
+    }
+
+    // Make value a multiple of step
+    // let v = this.p.round(value / this.step) * this.step;
+    let v = roundAtMost(value / this.step, this.stepPrecison);
+    v *= this.step;
+
+    /* Round to precision of step
+
+       E.g. if step is 0.1, then
+         0.30000000000000004 becomes 0.3
+    */
+    return roundAtMost(v, this.stepPrecison);
   }
 
 
@@ -149,17 +189,46 @@ class Slider {
   }
 
   setValue (newValue) {
-    newValue = this.p.constrain(newValue, this.minValue, this.maxValue);
+    // newValue = this.p.constrain(newValue, this.minValue, this.maxValue);
+    let rawValue = this.p.constrain(newValue, this.minValue, this.maxValue);
+
+    /*this.knobXPos = this.p.map(
+      newValue,
+      this.minValue, this.maxValue,
+      this.knobXPosMin, this.knobXPosMax
+    );*/
+
+    let stepAdjustedValue = this.roundToNearestStep(rawValue);
 
     this.knobXPos = this.p.map(
-      newValue,
+      stepAdjustedValue,
       this.minValue, this.maxValue,
       this.knobXPosMin, this.knobXPosMax
     );
   }
 
+  // TODO, modify to take step into account
   setValueAsPercent (pct) {
-    this.knobXPos = this.barXPos + (this.barWidth - this.knobWidth) * pct;
+    // this.knobXPos = this.barXPos + (this.barWidth - this.knobWidth) * pct;
+
+    let rawValue = this.p.map(
+      pct,
+      0, 1,
+      this.minValue, this.maxValue
+    );
+
+    let stepAdjustedValue = this.roundToNearestStep(rawValue);
+
+    this.knobXPos = this.p.map(
+      stepAdjustedValue,
+      this.minValue, this.maxValue,
+      // this.knobXPosMin, this.knobXPosMax
+      this.barXPos, this.barXPos + this.barWidth
+    );
+
+    this.knobXPos -= this.knobWidth / 2;
+
+    console.log(rawValue, stepAdjustedValue, this.knobXPos);
   }
 
 
@@ -211,11 +280,24 @@ class Slider {
   // ----------------------------------------------
 
   updateKnobPosition () {
-    this.knobXPos = this.p.constrain(
+    /*this.knobXPos = this.p.constrain(
       // this.p.mouseX,
       this.p.mouseX - this.knobHalfWidth,  // keeps mouse at center of knob...
       this.knobXPosMin, this.knobXPosMax
+    );*/
+
+    // let rawKnobXPos = this.p.constrain(
+    let selectedBarXPos = this.p.constrain(
+      this.p.mouseX,
+      // this.knobXPosMin, this.knobXPosMax
+      // this.p.mouseX - this.knobHalfWidth,  // keeps mouse at center of knob...
+      // this.knobXPosMin, this.knobXPosMax
+      this.barXPos, this.barXPos + this.barWidth
     );
+
+    //
+    // this.setValueAsPercent((rawKnobXPos - this.barXPos) / (this.barWidth - this.knobWidth));
+    this.setValueAsPercent((selectedBarXPos - this.barXPos) / this.barWidth);
 
     // console.log(this.getValue());
 
@@ -320,6 +402,19 @@ class Slider {
       this.p.noStroke();
     }
 
+    // Temp, draw notches
+    let range = this.maxValue - this.minValue;
+    let nSteps = range / this.step;
+    let stepSizeInPixels = this.barWidth / nSteps;
+    // console.log(range, nSteps, stepSizeInPixels);
+    this.p.stroke(0);
+    let tickY1 = this.barYPos - 10;
+    let tickY2 = this.barYPos - 20;
+    for (let x = this.barXPos; x <= this.barXPos + this.barWidth; x += stepSizeInPixels) {
+      this.p.line(x, tickY1, x, tickY2);
+    }
+    this.p.noStroke();
+
     // Draw knob
     if (this.knobIsHovered || this.knobIsSelected) {
       this.p.fill(this.knobHoveredColor);
@@ -331,6 +426,11 @@ class Slider {
       this.knobXPos, this.knobYPos, this.knobWidth, this.knobHeight,
       radius
     );
+
+    // Temp
+    this.p.stroke(255,0,0);
+    let x = this.knobXPos + this.knobWidth / 2;
+    this.p.line(x, this.barYPos, x, this.barYPos + this.barHeight);
 
     // Draw label
     if (this.showLabel && (this.label != null)) {

@@ -13,6 +13,8 @@ indexContent = """<!DOCTYPE html>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.3.1/p5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/5.0.0/math.min.js"></script>
 
+    <script src="../../../helperFunctions.js"></script>
+
     <meta charset="utf-8" />
 
     <style type="text/css">
