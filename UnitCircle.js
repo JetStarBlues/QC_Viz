@@ -1,75 +1,42 @@
 /*
-  ...
-
-  - Resizable
-
-  - toggle (as independent from complex controls)
-    - display imaginary component in label
-      - for the `1 == sq(realX) + sq(imgX) + sq(realY) + sq(imgY)`,
-        can simplify to `1 == sq(realX) + sq(realY)``
-
-  - Include complex viz as setting can turn on/off
-    - create sliders for each instance...
-    - toggle
-      - display imgX/imgY (imgα/imgβ) sliders
-      - display variable real circle
-        - or is this a given that it will always have diameter 1
-          when imaginary is 0...
-          i.e. no need to distinguish between "modes"
-          - if this is the case, can UI make real circle
-            dark outline, and 1-state as light (target)
-
-  - Better way to handle flipped p5 y-axis
-
-  - TODO,
-    - can fancy label be achieved without colors (simplify theming),
-      i.e. create contrast with things like underline / bold?
-
-    - simplifies theming
-    - still have computation problem
-
-  - Slider as own class??
-
-  - Call `p.textFont("monospace")` everywhere want to use,
-    don't rely on it being set globally
-
-  - Event handling
-    - who will dispatch to instances?
-      - ex. is there a "global" entity that will receive event
-        and trickle it down to each instance?
-    - how to propogate state change across circuit
-      - with the whole no-direction thing...
-
-  - How handle loop/noLoop
-    - do we just move to "global" dispatcher?
-
-  - Events that should trigger redraw
-    - mouse move, press, release, drag
-    - window resize
-  - Events that should trigger recalc (recalc should be followed by redraw)
-    - mouse drag & selected
-    - slider
-    - set from ket
-
-  - Make imaginary point draggable?
-
-  - Think a bit about how the y-axis direction thing
-    - Currently, we use p5 negative value in calculations,
-      and only invert when displaying (ex as label)
-    - How will this behave when apply gate matrix ??
-
-  - TODO,
-    turn "red" if not showing proof and state not unitary
-
-  - UI/UX to somehow toggle visibility of details...
-    - right click?
-    - press hold?
+  TODO
 
   - If have both sliders (real, imaginary)
     - how avoid inability to set precise (eq 1)
       - case for step e.g. if aiming for exactly 0.6 and 0.8
     - do we want button or something that locks
       - e.g. if adjust real, imaginary auto calculated to make 1?
+
+  - Better way to handle flipped p5 y-axis
+    - Think a bit about how the y-axis direction thing
+      - Currently, we use p5 negative value in calculations,
+        and only invert when displaying (ex as label)
+      - How will this behave when apply gate matrix ??
+    - Currently also not playing well with sliders...
+
+  - UI/UX to somehow toggle visibility of details...
+    - right click?
+    - press hold?
+
+  - Event handling
+    - who will dispatch to instances?
+      - ex. is there a "global" entity that will receive event
+        and trickle it down to each instance?
+    - who will call draw method of instances?
+      - when will they do this?
+    - how to propogate state change across circuit
+      - with the whole no-direction thing...
+
+    - Events that should trigger redraw
+      - mouse move, press, release, drag
+        - on circle
+        - on slider
+        - currently simple cause react to global
+          i.e. not trying to determine "where" occurs
+    - Events that should trigger recalc (recalc should be followed by redraw)
+      - mouse drag when point selected
+      - slider drag when slider selected
+      - set from ket
 */
 
 class UnitCircle {
@@ -95,7 +62,7 @@ class UnitCircle {
     // Configure display
     this.showLabel = true;
     this.showComplexLabel = true;
-    this.showNormalizedProof = false;
+    this.showNormalizedCheck = true;
 
     this.renderAsComplexCircle = true;
     this.showImaginaryCircle = true;
@@ -109,37 +76,19 @@ class UnitCircle {
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
     // value (unitary)
-    // arbitrary default value
-
-    // this.realX = 0.6;
-    // this.realY = -0.8;  // use p5 y-direction internally  // TODO, p5 y-axis thing
-    // this.imgX = 0;
-    // this.imgY = 0;
-    // this.realMagnitude = 1;
-    // this.imgMagnitude = 0;
-
-    this.realX = 0.4;
-    this.realY = -0.2;  // use p5 y-direction internally  // TODO, p5 y-axis thing
-    this.imgX = 0.5;
-    this.imgY = 0.5;
-    this.realMagnitude = this.p.sqrt(this.p.sq(this.realX) + this.p.sq(this.realY));
-    this.imgMagnitude = this.p.sqrt(this.p.sq(this.imgX) + this.p.sq(this.imgY));
-
-    // this.realX = 0;
-    // this.realY = 0;  // use p5 y-direction internally  // TODO, p5 y-axis thing
-    // this.imgX = 0.6;
-    // this.imgY = 0.8;
-    // this.realMagnitude = this.p.sqrt(this.p.sq(this.realX) + this.p.sq(this.realY));
-    // this.imgMagnitude = this.p.sqrt(this.p.sq(this.imgX) + this.p.sq(this.imgY));
-
-    // TODO, propogate initial state to sliders...
+    this.realX;
+    this.realY;  // TODO, p5 y-axis thing
+    this.imgX;
+    this.imgY;
+    this.realMagnitude;
+    this.imgMagnitude;
 
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
     // circle dimensions (pixels)
     this.baseCircleWidth = 180;
-    this.circleWidth = this.baseCircleWidth;  // TODO, make resizable
+    this.circleWidth = this.baseCircleWidth;
     this.circleRadius = this.circleWidth / 2;
     this.circleHalfRadius = this.circleRadius / 2;
 
@@ -158,14 +107,14 @@ class UnitCircle {
     // point label position (pixels)
     this.pointLabelX;
     this.pointLabelY;
-    this.pointLabelOffset = 30;  // TODO, make resizable
+    this.pointLabelOffset = 15;
     //
-    this.pointLabelTextSize = 14;  // TODO, make resizable?
+    this.pointLabelTextSize = 14;
 
     //
     this.pointIsHovered = false;
     this.pointIsSelected = false;
-    this.pointDiameter = 10;  // TODO, make resizable
+    this.pointDiameter = 10;
     this.pointHoveredDiameter = this.pointDiameter * 1.3;
     this.pointRadius = this.pointDiameter / 2;
 
@@ -196,20 +145,25 @@ class UnitCircle {
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
+    this.unitCircleThickness = 5;
+
+
+    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
     // slider dimensions (pixels)
-    this.sliderWidth = this.baseCircleWidth;
+    this.sliderWidth = this.circleWidth;
     this.sliderHeight = 10;
     this.sliderKnobWidth = this.sliderHeight * 2;
 
     // slider position (pixels)
-    this.sliderBaseX = - this.circleRadius;
+    this.sliderBaseX = -this.circleRadius;
     this.sliderBaseY = this.circleRadius * 1.5;
 
-    let sliderSpacing = this.sliderHeight * 2.3;
+    this.sliderSpacing = this.sliderHeight * 2.3;
     this.realXSliderYPos = this.sliderBaseY;
-    this.imgXSliderYPos = this.sliderBaseY + (sliderSpacing * 1);
-    this.realYSliderYPos = this.sliderBaseY + (sliderSpacing * 2);
-    this.imgYSliderYPos = this.sliderBaseY + (sliderSpacing * 3);
+    this.imgXSliderYPos = this.sliderBaseY + (this.sliderSpacing * 1);
+    this.realYSliderYPos = this.sliderBaseY + (this.sliderSpacing * 2);
+    this.imgYSliderYPos = this.sliderBaseY + (this.sliderSpacing * 3);
 
     // realX slider
     this.realXSlider = new Slider(
@@ -285,6 +239,37 @@ class UnitCircle {
     this.realProjectionYColor = this.p.color(0);
     this.imgProjectionXColor = this.p.color(colors["pal1col1"]);
     this.imgProjectionYColor = this.p.color(colors["pal1col1"]);
+
+
+    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+    // arbitrary default value
+
+    // this.realX = 0.6;
+    // this.realY = -0.8;  // use p5 y-direction internally  // TODO, p5 y-axis thing
+    // this.imgX = 0;
+    // this.imgY = 0;
+    // this.realMagnitude = 1;
+    // this.imgMagnitude = 0;
+
+    this.realX = 0.4;
+    this.realY = -0.2;  // use p5 y-direction internally  // TODO, p5 y-axis thing
+    this.imgX = 0.5;
+    this.imgY = 0.5;
+    this.realMagnitude = this.p.sqrt(this.p.sq(this.realX) + this.p.sq(this.realY));
+    this.imgMagnitude = this.p.sqrt(this.p.sq(this.imgX) + this.p.sq(this.imgY));
+
+    // this.realX = 0;
+    // this.realY = 0;  // use p5 y-direction internally  // TODO, p5 y-axis thing
+    // this.imgX = 0.6;
+    // this.imgY = 0.8;
+    // this.realMagnitude = this.p.sqrt(this.p.sq(this.realX) + this.p.sq(this.realY));
+    // this.imgMagnitude = this.p.sqrt(this.p.sq(this.imgX) + this.p.sq(this.imgY));
+
+    this.realXSlider.setValue(this.realX);
+    this.realYSlider.setValue(this.realY);  // TODO, the p5 y thing =/
+    this.imgXSlider.setValue(this.imgX);
+    this.imgYSlider.setValue(this.imgY);  // TODO, the p5 y thing =/
   }
 
 
@@ -349,24 +334,68 @@ class UnitCircle {
 
   setSize (newCircleWidth) {
 
+    // Resize circle
     this.circleWidth = newCircleWidth;
     this.circleRadius = this.circleWidth / 2;
     this.circleHalfRadius = this.circleRadius / 2;
 
-    // Shrink point size? or KISS?
-    /*if (newCircleWidth < this.baseCircleWidth * 0.5)
-    {
+
+    // Shrink point size for legibility or KISS?
+    if (newCircleWidth < (this.baseCircleWidth * 0.4)) {
       this.pointDiameter = 6;
       this.pointHoveredDiameter = this.pointDiameter * 1.3;
       this.pointRadius = this.pointDiameter / 2;
-      this.imgPointDiameter = this.pointDiameter * 0.8;
+
+      // this.imgPointDiameter = this.pointDiameter * 0.8;
+      this.imgPointDiameter = this.pointDiameter;
+      this.imgPointHoveredDiameter = this.imgPointDiameter * 1.3;
+      this.imgPointRadius = this.imgPointDiameter / 2;
 
       this.vectorThickness = 3;
-      this.imgVectorThickness = 2;
-    }*/
 
-    // TODO, sliders would need to be resized
+      this.unitCircleThickness = 4;
+    }
+    /* Undo above, use defaults
+       e.g. scenario where shrink, then enlarge
+    */
+    else {
+      this.pointDiameter = 10;
+      this.pointHoveredDiameter = this.pointDiameter * 1.3;
+      this.pointRadius = this.pointDiameter / 2;
 
+      this.imgPointDiameter = this.pointDiameter * 0.8;
+      this.imgPointHoveredDiameter = this.imgPointDiameter * 1.3;
+      this.imgPointRadius = this.imgPointDiameter / 2;
+
+      this.vectorThickness = 4;
+
+      this.unitCircleThickness = 5;
+    }
+
+
+    // Resize sliders
+    this.sliderWidth = this.circleWidth;
+    this.realXSlider.setSize(this.sliderWidth);
+    this.realYSlider.setSize(this.sliderWidth);
+    this.imgXSlider.setSize(this.sliderWidth);
+    this.imgYSlider.setSize(this.sliderWidth);
+
+    // Reposition sliders (position is based on circle size)
+    this.sliderBaseX = -this.circleRadius;
+    this.sliderBaseY = this.circleRadius * 1.5;
+
+    this.realXSliderYPos = this.sliderBaseY;
+    this.imgXSliderYPos = this.sliderBaseY + (this.sliderSpacing * 1);
+    this.realYSliderYPos = this.sliderBaseY + (this.sliderSpacing * 2);
+    this.imgYSliderYPos = this.sliderBaseY + (this.sliderSpacing * 3);
+
+    this.realXSlider.setTopLeft(null, this.realXSliderYPos);
+    this.realYSlider.setTopLeft(null, this.imgXSliderYPos);
+    this.imgXSlider.setTopLeft(null, this.realYSliderYPos);
+    this.imgYSlider.setTopLeft(null, this.imgYSliderYPos);
+
+
+    //
     this.updateMiscellanea();
   }
 
@@ -403,8 +432,6 @@ class UnitCircle {
       this.imgYSlider.setValue(this.imgY);  // TODO, the p5 y thing =/
     }
 
-    // TODO, would need to propogate change to sliders
-
     //
     this.updateMiscellanea();
   }
@@ -421,6 +448,10 @@ class UnitCircle {
     /* If user sets real sliders, imaginary values are auto-computed
        to create normalized vector.
        And vice versa if user sets imaginary sliders
+    */
+    /* TODO
+       Should we constrain autogen values to -1..1
+       - would mean some cases not normalized...
     */
     if (this.autoNormalizeSliders) {
 
@@ -464,18 +495,6 @@ class UnitCircle {
         // calculate new values
         this.realX = this.p.cos(theta) * this.realMagnitude;
         this.realY = this.p.sin(theta) * this.realMagnitude;
-
-        // TODO, figure out theta src...
-        /*let theta = this.p.atan2(
-          this.p.mouseY - this.centerY,
-          this.p.mouseX - this.centerX
-        );
-
-        let ux = this.p.cos(theta);
-        let uy = this.p.sin(theta);
-
-        this.realX = ux * this.realMagnitude;
-        this.realY = uy * this.realMagnitude;*/
       }
     }
 
@@ -516,8 +535,10 @@ class UnitCircle {
     this.imgPointX = this.imgX * this.circleRadius;
     this.imgPointY = this.imgY * this.circleRadius;
 
-    this.pointLabelX = this.realX * (this.circleRadius + this.pointLabelOffset);
-    this.pointLabelY = this.realY * (this.circleRadius + this.pointLabelOffset);
+    // TODO, theta should probably be global (cause used many places)
+    let theta = this.p.atan2(this.realY, this.realX);
+    this.pointLabelX = this.pointX + (this.pointLabelOffset * this.p.cos(theta));
+    this.pointLabelY = this.pointY + (this.pointLabelOffset * this.p.sin(theta));
 
     this.pointX += this.centerX;
     this.pointY += this.centerY;
@@ -693,11 +714,14 @@ class UnitCircle {
     if (this.renderAsComplexCircle) {
       if (this.isUnitary()) {
         this.p.stroke(this.unitCircleColor);
+        this.p.strokeWeight(1);
       }
       else {
         this.p.stroke(this.errorColor);
+        // aim of thick stroke is to always be visible regardless of overlap
+        this.p.strokeWeight(this.unitCircleThickness);
       }
-      this.p.strokeWeight(1);
+      // this.p.strokeWeight(1);
       this.p.noFill();
       this.p.circle(this.centerX, this.centerY, this.circleWidth);
     }
@@ -784,21 +808,25 @@ class UnitCircle {
     let realYText = roundAtMost(-this.realY, 2);  // display cartesian y-direction
     let imgYText = roundAtMost(-this.imgY, 2);  // display cartesian y-direction
 
-    // TODO, add simplified case
-    // if (this.showComplexLabel) {}
 
-    // basic label
-    {
-      this.p.fill(this.pointLabelBaseColor);
+    // Draw label
+    this.p.fill(this.pointLabelBaseColor);
+    if (this.showComplexLabel) {
       this.p.text(
         `(${realXText} + ${imgXText}i)∣0⟩ + (${realYText} + ${imgYText}i)∣1⟩`,
         // `【${realXText} + ${imgXText}i】∣0⟩ + 【${realYText} + ${imgYText}i】∣1⟩`,
         this.pointLabelX, this.pointLabelY
       );
     }
+    else {
+      this.p.text(
+        `${realXText}∣0⟩ + ${realYText}∣1⟩`,
+        this.pointLabelX, this.pointLabelY
+      );
+    }
 
     // Show whether sum of squares equals 1
-    if (this.showNormalizedProof) {
+    if (this.showNormalizedCheck) {
 
       // equation
       this.p.fill(this.pointLabelSecondaryColor);
@@ -885,8 +913,6 @@ class UnitCircle {
   }
 
   render () {
-    // this.drawCircle();
-
     this.drawUnitCircle();
 
     this.drawImaginaryCircle();
@@ -897,8 +923,8 @@ class UnitCircle {
     this.drawRealAxisProjections();
     this.drawRealPoint();
 
-    this.drawPointLabel();
-
     this.drawSliders();
+
+    this.drawPointLabel();
   }
 }

@@ -30,6 +30,7 @@ class Slider {
     // Configure display
     this.showLabel = false;
     this.roundEdges = true;
+    this.showBarCenterIndicator = true;
 
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
@@ -81,12 +82,15 @@ class Slider {
 
     // this.barColor = this.p.color(204);
     // this.barValueColor = this.p.color(255, 170, 170);
+    // this.barCenterIndicatorColor = this.p.color(255, 0, 0);
     // this.knobColor = this.p.color(102);
     // this.knobHoveredColor = this.p.color(0);
     // this.labelColor = this.p.color(0);
 
     this.barColor = this.p.color(colors["pal0col0"]);
     this.barValueColor = this.p.color(colors["pal0col1"]);
+    this.barCenterIndicatorColor = this.p.color(colors["pal0col2"]);
+    // this.barCenterIndicatorColor = this.p.color(colors["pal0col3"]);
     this.knobColor = this.p.color(colors["pal0col4"]);
     this.knobHoveredColor = this.p.color(colors["pal0col3"]);
     this.labelColor = this.p.color(0);
@@ -151,6 +155,8 @@ class Slider {
   }
 
   setValue (newValue) {
+    newValue = this.p.constrain(newValue, this.minValue, this.maxValue);
+
     this.knobXPos = this.p.map(
       newValue,
       this.minValue, this.maxValue,
@@ -306,6 +312,19 @@ class Slider {
     );
 
     this.p.rectMode(this.p.CORNER);  // restore default
+
+    /* Draw center of bar indicator...
+       Specifically, thinking of range -1..1 and desire to indicate 0
+    */
+    if (this.showBarCenterIndicator) {
+      let barCenterX = this.barXPos + (this.barWidth / 2);
+      this.p.strokeWeight(1);
+      this.p.stroke(this.barCenterIndicatorColor);
+      this.p.strokeCap(this.p.SQUARE);
+      this.p.line(barCenterX, this.barYPos, barCenterX, barBottomY);
+      this.p.strokeCap(this.p.ROUND);  // restore default
+      this.p.noStroke();
+    }
 
     // Draw knob
     if (this.knobIsHovered || this.knobIsSelected) {
