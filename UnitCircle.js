@@ -15,7 +15,6 @@
 
   - If have both sliders (real, imaginary)
     - how avoid inability to set precise (eq 1)
-      - case for step e.g. if aiming for exactly 0.6 and 0.8
     - do we want button or something that locks
       - e.g. if adjust real, imaginary auto calculated to make 1?
       - TODO, this is kinda clunky atm
@@ -27,6 +26,10 @@
         - Also it feels like sliders should reposition based on mode?
           - i.e. realX, imgX, realY, imgY if no auto
           - realX, realY, imgX, imgY if auto...
+        - Also, display currently rounds to 2 decimal places, and
+          many times equality is achieved at greater precision
+          i.e. rounded numbers don't equal 1, but full (non-visible)
+          float value does
 
   - UI/UX to somehow toggle visibility of details...
     - right click?
@@ -84,14 +87,14 @@ class UnitCircle {
     this.showAxisProjections = false;
 
     this.showSliders = true;
-    this.autoNormalizeSliders = false;  // hmm...
+    this.autoNormalizeSliders = false;
 
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
     // value (unitary)
     this.realX;
-    this.realY;  // TODO, p5 y-axis thing
+    this.realY;
     this.imgX;
     this.imgY;
     this.realMagnitude;
@@ -179,17 +182,25 @@ class UnitCircle {
     this.realYSliderYPos = this.sliderBaseY + (this.sliderSpacing * 2);
     this.imgYSliderYPos = this.sliderBaseY + (this.sliderSpacing * 3);
 
+    // slider settings
+    this.sliderMinValue = -1;
+    this.sliderMaxValue = 1;
+    this.sliderInitialValue = null;
+    this.sliderStep = 0.01;
+
     // realX slider
     this.realXSlider = new Slider(
       this.p,
       this.sliderBaseX,
       this.realXSliderYPos,
       this.sliderWidth, this.sliderHeight, this.sliderKnobWidth,
-      -1, 1,
-      null,
-      0.01
+      this.sliderMinValue, this.sliderMaxValue,
+      this.sliderInitialValue,
+      this.sliderStep
     );
-    this.realXSlider.setLabel("realX:");
+    // this.realXSlider.setLabel("real𝛼");
+    // this.realXSlider.setLabel("real⍺");
+    this.realXSlider.setLabel("real𝛂");
     this.realXSlider.showLabel = true;
 
     // imgX slider
@@ -198,11 +209,13 @@ class UnitCircle {
       this.sliderBaseX,
       this.imgXSliderYPos,
       this.sliderWidth, this.sliderHeight, this.sliderKnobWidth,
-      -1, 1,
-      null,
-      0.01
+      this.sliderMinValue, this.sliderMaxValue,
+      this.sliderInitialValue,
+      this.sliderStep
     );
-    this.imgXSlider.setLabel("imgX:");
+    // this.imgXSlider.setLabel("img𝛼");
+    // this.imgXSlider.setLabel("img⍺");
+    this.imgXSlider.setLabel("img𝛂");
     this.imgXSlider.showLabel = true;
 
     // realY slider
@@ -211,11 +224,13 @@ class UnitCircle {
       this.sliderBaseX,
       this.realYSliderYPos,
       this.sliderWidth, this.sliderHeight, this.sliderKnobWidth,
-      -1, 1,
-      null,
-      0.01
+      this.sliderMinValue, this.sliderMaxValue,
+      this.sliderInitialValue,
+      this.sliderStep
     );
-    this.realYSlider.setLabel("realY:");
+    // this.realYSlider.setLabel("real𝛽");
+    // this.realYSlider.setLabel("realꞵ");
+    this.realYSlider.setLabel("real𝛃");
     this.realYSlider.showLabel = true;
 
     // imgY slider
@@ -224,11 +239,13 @@ class UnitCircle {
       this.sliderBaseX,
       this.imgYSliderYPos,
       this.sliderWidth, this.sliderHeight, this.sliderKnobWidth,
-      -1, 1,
-      null,
-      0.01
+      this.sliderMinValue, this.sliderMaxValue,
+      this.sliderInitialValue,
+      this.sliderStep
     );
-    this.imgYSlider.setLabel("imgY:");
+    // this.imgYSlider.setLabel("img𝛽");
+    // this.imgYSlider.setLabel("imgꞵ");
+    this.imgYSlider.setLabel("img𝛃");
     this.imgYSlider.showLabel = true;
 
 
@@ -424,6 +441,30 @@ class UnitCircle {
 
   // ----------------------------------------------
 
+  // TODO, this mode needs more work
+  enableAutoNormalizeSliders () {
+    this.autoNormalizeSliders = true;
+
+    // Disable slider step for maximum precision
+    this.realXSlider.setStep(null);
+    this.realYSlider.setStep(null);
+    this.imgXSlider.setStep(null);
+    this.imgYSlider.setStep(null);
+  }
+
+  disableAutoNormalizeSliders () {
+    this.autoNormalizeSliders = false;
+
+    // Restore slider step
+    this.realXSlider.setStep(this.sliderStep);
+    this.realYSlider.setStep(this.sliderStep);
+    this.imgXSlider.setStep(this.sliderStep);
+    this.imgYSlider.setStep(this.sliderStep);
+  }
+
+
+  // ----------------------------------------------
+
   updateRealSliderValues () {
     this.realXSlider.setValue(this.realX);
     this.realYSlider.setValue(this.realY);
@@ -491,105 +532,104 @@ class UnitCircle {
     this.updateMiscellanea();
   }
 
+
+  // ----------------------------------------------
+
+  // TODO, this needs more work
+  _updateValuesUsingSliders_autoNormalize () {
+    /* If user sets real sliders, imaginary values are auto-computed
+       to create normalized vector.
+       And vice versa if user sets imaginary sliders.
+    */
+
+    // user set real, auto set imaginary
+    if (this.realXSlider.knobIsSelected || this.realYSlider.knobIsSelected) {
+      // console.log("user set real, auto set imaginary");
+
+      // get values from slider
+      this.realX = this.realXSlider.getValue();
+      this.realY = this.realYSlider.getValue();
+
+      // calculate magnitudes
+      let realMagnitudeSquared = this.p.sq(this.realX) + this.p.sq(this.realY);
+      if (realMagnitudeSquared > 1) {
+        console.log("abort, negative sqrt");
+        return;
+      }
+      this.realMagnitude = this.p.sqrt(realMagnitudeSquared);
+      this.imgMagnitude = this.p.sqrt(1 - realMagnitudeSquared);
+
+      // get current angle
+      let theta = this.p.atan2(this.imgY, this.imgX);
+
+      // calculate new values
+      this.imgX = this.p.cos(theta) * this.imgMagnitude;
+      this.imgY = this.p.sin(theta) * this.imgMagnitude;
+
+      // propogate change to sliders
+      this.updateImaginarySliderValues();
+    }
+
+    // user set imaginary, auto set real
+    else {
+      // console.log("user set imaginary, auto set real");
+
+      // get values from slider
+      this.imgX = this.imgXSlider.getValue();
+      this.imgY = this.imgYSlider.getValue();
+
+      // calculate magnitudes
+      let imgMagnitudeSquared = this.p.sq(this.imgX) + this.p.sq(this.imgY);
+      if (imgMagnitudeSquared > 1) {
+        console.log("abort, negative sqrt");
+        return;
+      }
+      this.imgMagnitude = this.p.sqrt(imgMagnitudeSquared);
+      this.realMagnitude = this.p.sqrt(1 - imgMagnitudeSquared);
+
+      // get current angle
+      let theta = this.p.atan2(this.realY, this.realX);
+
+      // calculate new values
+      this.realX = this.p.cos(theta) * this.realMagnitude;
+      this.realY = this.p.sin(theta) * this.realMagnitude;
+
+      // propogate changes to sliders
+      this.updateRealSliderValues();
+    }
+  }
+
+  _updateValuesUsingSliders_manual () {
+    // console.log("use all slider values");
+
+    // get values from slider
+    this.realX = this.realXSlider.getValue();
+    this.realY = this.realYSlider.getValue();
+    this.imgX = this.imgXSlider.getValue();
+    this.imgY = this.imgYSlider.getValue();
+
+    this.realMagnitude = this.calculateRealMagnitude();
+    this.imgMagnitude = this.calculateImaginaryMagnitude();
+  }
+
   updateValuesUsingSliders () {
     /* Assumes `this.imgX` and `this.imgY`
        have *just* been set with sliders
     */
 
-    // TODO, auto normalize...
-    /* TODO, might have to turn off step for this to work?
-    */
-
-    /* If user sets real sliders, imaginary values are auto-computed
-       to create normalized vector.
-       And vice versa if user sets imaginary sliders.
-    */
     if (this.autoNormalizeSliders) {
-
-      // user set real, auto set imaginary
-      if (this.realXSlider.knobIsSelected || this.realYSlider.knobIsSelected) {
-        console.log("user set real, auto set imaginary");
-        // get values from slider
-        this.realX = this.realXSlider.getValue();
-        this.realY = this.realYSlider.getValue();
-
-        // calculate magnitudes
-        let realMagnitudeSquared = this.p.sq(this.realX) + this.p.sq(this.realY);
-        // console.log(`realMagSq: ${realMagnitudeSquared}`);
-
-        /*
-          TODO
-          compareFloat?
-          or will slider step resolve...
-          if rsq == 1 within epsilon set to 1
-
-          i.e. treat `1.0000000000000002` as 1
-        */
-
-        /* Cannot take sqrt of negative number.
-           Unable to auto normalize.
-        */
-        if (realMagnitudeSquared > 1) {
-          console.log("abort, negative sqrt");
-          return;
-        }
-        this.realMagnitude = this.p.sqrt(realMagnitudeSquared);
-        this.imgMagnitude = this.p.sqrt(1 - realMagnitudeSquared);
-
-        // get current angle
-        let theta = this.p.atan2(this.imgY, this.imgX);
-
-        // calculate new values
-        this.imgX = this.p.cos(theta) * this.imgMagnitude;
-        this.imgY = this.p.sin(theta) * this.imgMagnitude;
-
-        // propogate change to sliders
-        this.updateImaginarySliderValues();
-      }
-
-      // user set imaginary, auto set real
-      else {
-        console.log("user set imaginary, auto set real");
-        // get values from slider
-        this.imgX = this.imgXSlider.getValue();
-        this.imgY = this.imgYSlider.getValue();
-
-        // calculate magnitudes
-        let imgMagnitudeSquared = this.p.sq(this.imgX) + this.p.sq(this.imgY);
-        if (imgMagnitudeSquared > 1) {
-          console.log("abort, negative sqrt");
-          return;
-        }
-        this.imgMagnitude = this.p.sqrt(imgMagnitudeSquared);
-        this.realMagnitude = this.p.sqrt(1 - imgMagnitudeSquared);
-
-        // get current angle
-        let theta = this.p.atan2(this.realY, this.realX);
-
-        // calculate new values
-        this.realX = this.p.cos(theta) * this.realMagnitude;
-        this.realY = this.p.sin(theta) * this.realMagnitude;
-
-        // propogate changes to sliders
-        this.updateRealSliderValues();
-      }
+      this._updateValuesUsingSliders_autoNormalize();
     }
-
     else {
-      console.log("use all slider values");
-      // get values from slider
-      this.realX = this.realXSlider.getValue();
-      this.realY = this.realYSlider.getValue();
-      this.imgX = this.imgXSlider.getValue();
-      this.imgY = this.imgYSlider.getValue();
-
-      this.realMagnitude = this.calculateRealMagnitude();
-      this.imgMagnitude = this.calculateImaginaryMagnitude();
+      this._updateValuesUsingSliders_manual();
     }
 
     //
     this.updateMiscellanea();
   }
+
+
+  // ----------------------------------------------
 
   updateValuesUsingKet () {
     /* Assumes `this.realX`, `this.imgX`, `this.realY`, and `this.imgY`
@@ -606,6 +646,9 @@ class UnitCircle {
     //
     this.updateMiscellanea();
   }
+
+
+  // ----------------------------------------------
 
   updateMiscellanea () {
     // Convert from cartesian y-direction to p5
@@ -896,6 +939,7 @@ class UnitCircle {
       let y = this.pointLabelY + (this.pointLabelTextSize * 2);
       this.p.text(
         ` 1 = (real𝛼² + img𝛼²) + (real𝛽² + img𝛽²)`,
+        // ` 1 = (real𝛂² + img𝛂²) + (real𝛃² + img𝛃²)`,
         this.pointLabelX, y
       )
 

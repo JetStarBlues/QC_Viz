@@ -8,7 +8,9 @@ class Slider {
     p,
     barXPos, barYPos, barWidth, barHeight,
     knobWidth,
-    minValue, maxValue, initialValue, step
+    minValue, maxValue,
+    initialValue,  // optional
+    step  // optional
   ) {
 
     this.p = p;  // p5.js instance
@@ -30,7 +32,7 @@ class Slider {
     // values slider represents
     this.minValue = minValue;
     this.maxValue = maxValue;
-    this.step = step ? step : null;  // optional (also not currently implemented)
+    this.step = step ? step : null;
 
     // position and size of bar
     this.barXPos   = barXPos;
@@ -88,13 +90,6 @@ class Slider {
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
-    // this.barColor = this.p.color(204);
-    // this.barValueColor = this.p.color(255, 170, 170);
-    // this.barCenterIndicatorColor = this.p.color(255, 0, 0);
-    // this.knobColor = this.p.color(102);
-    // this.knobHoveredColor = this.p.color(0);
-    // this.labelColor = this.p.color(0);
-
     this.barColor = this.p.color(colors["pal0col0"]);
     this.barValueColor = this.p.color(colors["pal0col1"]);
     this.barCenterIndicatorColor = this.p.color(colors["pal0col2"]);
@@ -129,6 +124,9 @@ class Slider {
     this.barXPosMax = this.barXPos + this.barWidth;
     this.visualBarXPosMax = this.visualBarXPos + this.barWidth + this.knobWidth;
 
+    //
+    this.barHalfHeight = this.barHeight / 2;
+
 
     // min and max values of knob
     this.knobXPosMin = this.barXPos;
@@ -138,6 +136,28 @@ class Slider {
     this.knobYPos = this.barYPos;
     if (currentValue != null) {
       this.setValue(currentValue);
+    }
+
+
+    //
+    this.textSize = this.barHeight * 1.2;
+  }
+
+
+  // ----------------------------------------------
+
+  getStep () {
+    return this.step;
+  }
+
+  setStep (step) {
+    this.step = step;
+
+    if (step == null) {
+      this.stepPrecison = null;
+    }
+    else {
+      this.stepPrecison = countDecimals(step);
     }
   }
 
@@ -405,14 +425,14 @@ class Slider {
          - places text to left of bar, centered vertically
       */
       this.p.textFont("monospace");
-      this.p.textSize(this.barHeight * 1.1);
+      this.p.textSize(this.textSize);
       this.p.noStroke();
       this.p.fill(this.labelColor);
       this.p.textAlign(this.p.RIGHT, this.p.CENTER);
       this.p.text(
         this.label,
         this.visualBarXPos - 5,  // a bit of breathing space
-        this.barYPos + (this.barHeight / 2)  // center Y
+        this.barYPos + this.barHalfHeight  // center Y
       );
     }
   }
