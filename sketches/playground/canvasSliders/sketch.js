@@ -11,20 +11,24 @@ let sketch = function (p) {
       // 200, 50, 50 * 2,
       200, 10, 10 * 2,
       // 0, 1
-      // 0, 1, 0.1
+      0, 1, 0.1
       // 0, 1, 0.1, 0.1
       // 0, 1, 0.1, 0.01
-      0, 1, null, 0.1
+      // 0, 1, null, 0.1
       // 0, 1, 0.23, 0.1
       // 0, 1, 0.25, 0.1
     );
 
     s.setLabel("pots:");
     s.showLabel = true;
+    s.debugMode = true;
   }
 
   p.draw = function () {
     p.background(240);
+
+    // p.stroke(0, 0, 255);
+    // p.line(50, 0, 50, p.height);
 
     s.render();
 

@@ -2,11 +2,6 @@
     - https://processing.org/examples/scrollbar.html
 */
 
-/*
-  TODO
-   - step
-*/
-
 class Slider {
 
   constructor (
@@ -26,6 +21,9 @@ class Slider {
     this.roundEdges = true;
     this.showBarCenterIndicator = true;
 
+    //
+    this.debugMode = false;
+
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
@@ -34,11 +32,13 @@ class Slider {
     this.maxValue = maxValue;
     this.step = step ? step : null;  // optional (also not currently implemented)
 
-    // size and position of bar
-    this.barWidth  = barWidth;
-    this.barHeight = barHeight;
+    // position and size of bar
     this.barXPos   = barXPos;
     this.barYPos   = barYPos;
+    this.barHeight = barHeight;
+    // this.barWidth  = barWidth;
+    // Take difference between visual and actual bar into account
+    this.barWidth = this.p.max(0, barWidth - knobWidth);
 
     // size of knob
     this.knobWidth = knobWidth;
@@ -57,14 +57,19 @@ class Slider {
     // ...
     this.calculateDimensions();
 
+
+    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+    // Keep track of "set" value
+    this.value = null;
+
     // set slider value
     if (initialValue != null) {
       this.setValue(initialValue);
     }
     else {
       // initialize at center of bar
-      // this.setValueAsPercent(0.5);
-      this.setValueAsPercent(0.35);
+      this.setValueAsPercent(0.5);
     }
 
 
@@ -106,9 +111,28 @@ class Slider {
     this.knobHeight = this.barHeight;
     this.knobHalfWidth = this.knobWidth / 2;
 
+
+    /* "visual bar" vs "actual bar".
+       Visual bar overflows actual on both sides by knobHalfWidth.
+       So that avoid visual appearance of knob half hanging
+       outside of bar when at min and max.
+       And range appearing to expand as consequence.
+
+       ooo      ooo       ooo
+        --------------------
+       ^                    ^
+    */
+    this.visualBarXPos = this.barXPos;
+    this.barXPos += this.knobHalfWidth;
+
+    // max value of bar
+    this.barXPosMax = this.barXPos + this.barWidth;
+    this.visualBarXPosMax = this.visualBarXPos + this.barWidth + this.knobWidth;
+
+
     // min and max values of knob
     this.knobXPosMin = this.barXPos;
-    this.knobXPosMax = this.barXPos + this.barWidth - this.knobWidth;
+    this.knobXPosMax = this.barXPosMax - this.knobWidth;
 
     // position of knob
     this.knobYPos = this.barYPos;
@@ -134,7 +158,6 @@ class Slider {
     }
 
     // Make value a multiple of step
-    // let v = this.p.round(value / this.step) * this.step;
     let v = roundAtMost(value / this.step, this.stepPrecison);
     v *= this.step;
 
@@ -150,53 +173,11 @@ class Slider {
   // ----------------------------------------------
 
   getValue () {
-    let value = this.p.map(
-      this.knobXPos,
-      this.knobXPosMin, this.knobXPosMax,
-      this.minValue, this.maxValue
-    );
-
-    return value;
-
-
-    /*
-      Consider `this.step` in value returned.
-      Want to floor value accordingly. E.g.
-        minValue = 0
-        maxValue = 4
-        value = 3.6
-
-        if step = 1, return 3
-        if step = 0.5, return 3.5
-
-      TODO,
-      this should probably be round, not floor.
-      i.e. with example above
-        if step = 1, return 4
-        if step = 0.5, return 3.5
-    */
-    /*
-    if (this.step != null)
-    {
-      if ((value % this.step) === 0) {
-        return value;
-      }
-      else {
-        return this.p.floor(value / this.step) * this.step;
-      }
-    }
-    */
+    return this.value;
   }
 
   setValue (newValue) {
-    // newValue = this.p.constrain(newValue, this.minValue, this.maxValue);
     let rawValue = this.p.constrain(newValue, this.minValue, this.maxValue);
-
-    /*this.knobXPos = this.p.map(
-      newValue,
-      this.minValue, this.maxValue,
-      this.knobXPosMin, this.knobXPosMax
-    );*/
 
     let stepAdjustedValue = this.roundToNearestStep(rawValue);
 
@@ -205,12 +186,12 @@ class Slider {
       this.minValue, this.maxValue,
       this.knobXPosMin, this.knobXPosMax
     );
+
+    //
+    this.value = stepAdjustedValue;
   }
 
-  // TODO, modify to take step into account
   setValueAsPercent (pct) {
-    // this.knobXPos = this.barXPos + (this.barWidth - this.knobWidth) * pct;
-
     let rawValue = this.p.map(
       pct,
       0, 1,
@@ -222,13 +203,15 @@ class Slider {
     this.knobXPos = this.p.map(
       stepAdjustedValue,
       this.minValue, this.maxValue,
-      // this.knobXPosMin, this.knobXPosMax
-      this.barXPos, this.barXPos + this.barWidth
+      this.barXPos, this.barXPosMax
     );
 
-    this.knobXPos -= this.knobWidth / 2;
+    this.knobXPos -= this.knobHalfWidth;
 
-    console.log(rawValue, stepAdjustedValue, this.knobXPos);
+    //
+    this.value = stepAdjustedValue;
+
+    // console.log(rawValue, stepAdjustedValue, this.knobXPos);
   }
 
 
@@ -247,7 +230,10 @@ class Slider {
 
     // Update dimensions
     if (barWidth != null) {
-      this.barWidth = barWidth;
+      // this.barWidth = barWidth;
+
+      // Take difference between visual and actual bar into account
+      this.barWidth = this.p.max(0, barWidth - this.knobWidth);
     }
     if (barHeight != null) {
       this.barHeight = barHeight;
@@ -280,46 +266,15 @@ class Slider {
   // ----------------------------------------------
 
   updateKnobPosition () {
-    /*this.knobXPos = this.p.constrain(
-      // this.p.mouseX,
-      this.p.mouseX - this.knobHalfWidth,  // keeps mouse at center of knob...
-      this.knobXPosMin, this.knobXPosMax
-    );*/
 
-    // let rawKnobXPos = this.p.constrain(
     let selectedBarXPos = this.p.constrain(
       this.p.mouseX,
-      // this.knobXPosMin, this.knobXPosMax
-      // this.p.mouseX - this.knobHalfWidth,  // keeps mouse at center of knob...
-      // this.knobXPosMin, this.knobXPosMax
-      this.barXPos, this.barXPos + this.barWidth
+      this.barXPos, this.barXPosMax
     );
 
-    //
-    // this.setValueAsPercent((rawKnobXPos - this.barXPos) / (this.barWidth - this.knobWidth));
-    this.setValueAsPercent((selectedBarXPos - this.barXPos) / this.barWidth);
+    let pct = (selectedBarXPos - this.barXPos) / this.barWidth;
 
-    // console.log(this.getValue());
-
-    /*
-      "Snap" according to `this.step`.
-      Currently not implemented.
-
-      Probaby trickier than might seem at first glance.
-      Slider snaps to a position based on round?....
-
-       0       1          2        3        4
-      ||---.---||--x-.-x--||---.---||---.---||
-                   ^   ^
-                   |   |_ slider will snap to 2
-                   |
-                   |_ slider will snap to 1
-    */
-    /*
-    if (this.step != null) {
-      // TODO
-    }
-    */
+    this.setValueAsPercent(pct);
   }
 
 
@@ -372,18 +327,18 @@ class Slider {
     // Draw bar
     this.p.rectMode(this.p.CORNERS);
 
-    let knobCenterX = this.knobXPos + (this.knobWidth / 2);
+    let knobCenterX = this.knobXPos + this.knobHalfWidth;
     let barBottomY = this.barYPos + this.barHeight;
 
     this.p.noStroke();
     this.p.fill(this.barValueColor);
     this.p.rect(
-      this.barXPos, this.barYPos, knobCenterX, barBottomY,
+      this.visualBarXPos, this.barYPos, knobCenterX, barBottomY,
       radius, 0, 0, radius
     );
     this.p.fill(this.barColor);
     this.p.rect(
-      knobCenterX, this.barYPos, this.barXPos + this.barWidth, barBottomY,
+      knobCenterX, this.barYPos, this.visualBarXPosMax, barBottomY,
       0, radius, radius, 0
     );
 
@@ -402,18 +357,24 @@ class Slider {
       this.p.noStroke();
     }
 
-    // Temp, draw notches
-    let range = this.maxValue - this.minValue;
-    let nSteps = range / this.step;
-    let stepSizeInPixels = this.barWidth / nSteps;
-    // console.log(range, nSteps, stepSizeInPixels);
-    this.p.stroke(0);
-    let tickY1 = this.barYPos - 10;
-    let tickY2 = this.barYPos - 20;
-    for (let x = this.barXPos; x <= this.barXPos + this.barWidth; x += stepSizeInPixels) {
-      this.p.line(x, tickY1, x, tickY2);
+
+    // Debug, draw notches
+    if (this.debugMode) {
+      if (this.step != null) {
+        let range = this.maxValue - this.minValue;
+        let nSteps = range / this.step;
+        let stepSizeInPixels = this.barWidth / nSteps;
+        this.p.stroke(0);
+        let tickHeight = 5;
+        let tickY1 = this.barYPos - 10;
+        let tickY2 = tickY1 - tickHeight;
+        for (let x = this.barXPos; x <= this.barXPosMax; x += stepSizeInPixels) {
+          this.p.line(x, tickY1, x, tickY2);
+        }
+        this.p.noStroke();
+      }
     }
-    this.p.noStroke();
+
 
     // Draw knob
     if (this.knobIsHovered || this.knobIsSelected) {
@@ -427,10 +388,15 @@ class Slider {
       radius
     );
 
-    // Temp
-    this.p.stroke(255,0,0);
-    let x = this.knobXPos + this.knobWidth / 2;
-    this.p.line(x, this.barYPos, x, this.barYPos + this.barHeight);
+
+    // Debug, draw knob center
+    if (this.debugMode) {
+      this.p.stroke(255,0,0);
+      let x = this.knobXPos + this.knobHalfWidth;
+      this.p.line(x, this.barYPos, x, this.barYPos + this.barHeight);
+      this.p.noStroke();
+    }
+
 
     // Draw label
     if (this.showLabel && (this.label != null)) {
@@ -445,7 +411,7 @@ class Slider {
       this.p.textAlign(this.p.RIGHT, this.p.CENTER);
       this.p.text(
         this.label,
-        this.barXPos - 5,  // a bit of breathing space
+        this.visualBarXPos - 5,  // a bit of breathing space
         this.barYPos + (this.barHeight / 2)  // center Y
       );
     }

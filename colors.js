@@ -14,7 +14,7 @@ colors = {
 
   // www.colourlovers.com/palette/1597233/500_honies
   "pal1col0" : [253, 241, 204],  // khaki
-  "pal1col1" : [198, 214, 184],  // olive
+  "pal1col1" : [198, 214, 184],  // pastel green
   "pal1col2" : [152, 127, 105],  // brown
   "pal1col3" : [227, 173, 64],  // dark yellow
   "pal1col4" : [252, 208, 54],  // yellow

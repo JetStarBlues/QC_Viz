@@ -84,7 +84,7 @@ class UnitCircle {
     this.showAxisProjections = false;
 
     this.showSliders = true;
-    this.autoNormalizeSliders = true;  // hmm...
+    this.autoNormalizeSliders = false;  // hmm...
 
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
@@ -185,7 +185,9 @@ class UnitCircle {
       this.sliderBaseX,
       this.realXSliderYPos,
       this.sliderWidth, this.sliderHeight, this.sliderKnobWidth,
-      -1, 1
+      -1, 1,
+      null,
+      0.01
     );
     this.realXSlider.setLabel("realX:");
     this.realXSlider.showLabel = true;
@@ -196,7 +198,9 @@ class UnitCircle {
       this.sliderBaseX,
       this.imgXSliderYPos,
       this.sliderWidth, this.sliderHeight, this.sliderKnobWidth,
-      -1, 1
+      -1, 1,
+      null,
+      0.01
     );
     this.imgXSlider.setLabel("imgX:");
     this.imgXSlider.showLabel = true;
@@ -207,7 +211,9 @@ class UnitCircle {
       this.sliderBaseX,
       this.realYSliderYPos,
       this.sliderWidth, this.sliderHeight, this.sliderKnobWidth,
-      -1, 1
+      -1, 1,
+      null,
+      0.01
     );
     this.realYSlider.setLabel("realY:");
     this.realYSlider.showLabel = true;
@@ -218,7 +224,9 @@ class UnitCircle {
       this.sliderBaseX,
       this.imgYSliderYPos,
       this.sliderWidth, this.sliderHeight, this.sliderKnobWidth,
-      -1, 1
+      -1, 1,
+      null,
+      0.01
     );
     this.imgYSlider.setLabel("imgY:");
     this.imgYSlider.showLabel = true;
@@ -489,6 +497,8 @@ class UnitCircle {
     */
 
     // TODO, auto normalize...
+    /* TODO, might have to turn off step for this to work?
+    */
 
     /* If user sets real sliders, imaginary values are auto-computed
        to create normalized vector.
