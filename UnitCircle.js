@@ -1,4 +1,16 @@
 /*
+  Notes
+
+  - In the p5 coordinate system, the y-axis increases downwards
+    (i.e. the highest point is at the bottom of the canvas), whereas
+    in the cartesian coordinate system, the y-axis increases upwards
+    (i.e. the lowest point is at the bottom of the canvas).
+
+    - For unitary calculations, the cartesian y-direction is used
+    - For drawing, the p5 y-direction is used
+*/
+
+/*
   TODO
 
   - If have both sliders (real, imaginary)
@@ -15,13 +27,6 @@
         - Also it feels like sliders should reposition based on mode?
           - i.e. realX, imgX, realY, imgY if no auto
           - realX, realY, imgX, imgY if auto...
-
-  - Better way to handle flipped p5 y-axis
-    - Think a bit about how the y-axis direction thing
-      - Currently, we use p5 negative value in calculations,
-        and only invert when displaying (ex as label)
-      - How will this behave when apply gate matrix ??
-    - Currently also not playing well with sliders...
 
   - UI/UX to somehow toggle visibility of details...
     - right click?
@@ -255,30 +260,30 @@ class UnitCircle {
     // arbitrary default value
 
     // this.realX = 0.6;
-    // this.realY = -0.8;  // use p5 y-direction internally  // TODO, p5 y-axis thing
+    // this.realY = 0.8;
     // this.imgX = 0;
     // this.imgY = 0;
     // this.realMagnitude = 1;
     // this.imgMagnitude = 0;
 
     this.realX = 0.4;
-    this.realY = -0.2;  // use p5 y-direction internally  // TODO, p5 y-axis thing
+    this.realY = 0.2;
     this.imgX = 0.5;
     this.imgY = 0.5;
     this.realMagnitude = this.p.sqrt(this.p.sq(this.realX) + this.p.sq(this.realY));
     this.imgMagnitude = this.p.sqrt(this.p.sq(this.imgX) + this.p.sq(this.imgY));
 
     // this.realX = 0;
-    // this.realY = 0;  // use p5 y-direction internally  // TODO, p5 y-axis thing
+    // this.realY = 0;
     // this.imgX = 0.6;
     // this.imgY = 0.8;
     // this.realMagnitude = this.p.sqrt(this.p.sq(this.realX) + this.p.sq(this.realY));
     // this.imgMagnitude = this.p.sqrt(this.p.sq(this.imgX) + this.p.sq(this.imgY));
 
     this.realXSlider.setValue(this.realX);
-    this.realYSlider.setValue(this.realY);  // TODO, the p5 y thing =/
+    this.realYSlider.setValue(this.realY);
     this.imgXSlider.setValue(this.imgX);
-    this.imgYSlider.setValue(this.imgY);  // TODO, the p5 y thing =/
+    this.imgYSlider.setValue(this.imgY);
   }
 
 
@@ -346,7 +351,6 @@ class UnitCircle {
   // ----------------------------------------------
 
   setSize (newCircleWidth) {
-
     // Resize circle
     this.circleWidth = newCircleWidth;
     this.circleRadius = this.circleWidth / 2;
@@ -414,12 +418,12 @@ class UnitCircle {
 
   updateRealSliderValues () {
     this.realXSlider.setValue(this.realX);
-    this.realYSlider.setValue(this.realY);  // TODO, the p5 y thing =/
+    this.realYSlider.setValue(this.realY);
   }
 
   updateImaginarySliderValues () {
     this.imgXSlider.setValue(this.imgX);
-    this.imgYSlider.setValue(this.imgY);  // TODO, the p5 y thing =/
+    this.imgYSlider.setValue(this.imgY);
   }
 
   updateSliderPositions () {
@@ -456,6 +460,9 @@ class UnitCircle {
 
     let ux = this.p.cos(theta);
     let uy = this.p.sin(theta);
+
+    // Convert from p5 y-direction to cartesian
+    uy *= -1;
 
     if (updateRealValues) {
       this.realX = ux * this.realMagnitude;
@@ -591,13 +598,18 @@ class UnitCircle {
   }
 
   updateMiscellanea () {
+    // Convert from cartesian y-direction to p5
+    let realY = -this.realY;
+    let imgY = -this.imgY;
+
+    //
     this.pointX = this.realX * this.circleRadius;
-    this.pointY = this.realY * this.circleRadius;
+    this.pointY = realY * this.circleRadius;
 
     this.imgPointX = this.imgX * this.circleRadius;
-    this.imgPointY = this.imgY * this.circleRadius;
+    this.imgPointY = imgY * this.circleRadius;
 
-    let theta = this.p.atan2(this.realY, this.realX);
+    let theta = this.p.atan2(realY, this.realX);
     this.pointLabelX = this.pointX + (this.pointLabelOffset * this.p.cos(theta));
     this.pointLabelY = this.pointY + (this.pointLabelOffset * this.p.sin(theta));
 
@@ -627,7 +639,6 @@ class UnitCircle {
   }
 
   mouseMovedHandler_draggablePoints () {
-
     // real point
     if (this.mouseIsCloseToPoint(this.pointX, this.pointY, this.pointRadius)) {
       this.pointIsHovered = true;
@@ -847,10 +858,8 @@ class UnitCircle {
     //
     let realXText = roundAtMost(this.realX, 2);
     let imgXText = roundAtMost(this.imgX, 2);
-    // TODO, p5 y-axis thing
-    let realYText = roundAtMost(-this.realY, 2);  // display cartesian y-direction
-    let imgYText = roundAtMost(-this.imgY, 2);  // display cartesian y-direction
-
+    let realYText = roundAtMost(this.realY, 2);
+    let imgYText = roundAtMost(this.imgY, 2);
 
     // Draw label
     this.p.fill(this.pointLabelBaseColor);
