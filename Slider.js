@@ -129,8 +129,8 @@ class Slider {
 
 
     // min and max values of knob
-    this.knobXPosMin = this.barXPos;
-    this.knobXPosMax = this.barXPosMax - this.knobWidth;
+    this.knobXPosMin = this.barXPos - this.knobHalfWidth;
+    this.knobXPosMax = this.barXPosMax - this.knobHalfWidth;
 
     // position of knob
     this.knobYPos = this.barYPos;
@@ -209,6 +209,8 @@ class Slider {
 
     //
     this.value = stepAdjustedValue;
+
+    // console.log(newValue, rawValue, stepAdjustedValue);
   }
 
   setValueAsPercent (pct) {
