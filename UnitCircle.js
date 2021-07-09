@@ -91,6 +91,7 @@ class UnitCircle {
 
     this.renderAsComplexCircle = true;
     this.showImaginaryCircle = true;
+    this.showUnitCircle = true;
 
     this.showAxisProjections = false;
 
@@ -299,19 +300,19 @@ class UnitCircle {
     // this.realMagnitude = 1;
     // this.imgMagnitude = 0;
 
-    this.realX = 0.4;
-    this.realY = 0.2;
-    this.imgX = 0.5;
-    this.imgY = 0.5;
-    this.realMagnitude = this.p.sqrt(this.p.sq(this.realX) + this.p.sq(this.realY));
-    this.imgMagnitude = this.p.sqrt(this.p.sq(this.imgX) + this.p.sq(this.imgY));
+    // this.realX = 0.4;
+    // this.realY = 0.2;
+    // this.imgX = 0.5;
+    // this.imgY = 0.5;
+    // this.realMagnitude = this.calculateRealMagnitude();
+    // this.imgMagnitude = this.calculateImaginaryMagnitude();
 
-    // this.realX = 0;
-    // this.realY = 0;
-    // this.imgX = 0.6;
-    // this.imgY = 0.8;
-    // this.realMagnitude = this.p.sqrt(this.p.sq(this.realX) + this.p.sq(this.realY));
-    // this.imgMagnitude = this.p.sqrt(this.p.sq(this.imgX) + this.p.sq(this.imgY));
+    this.realX = 0.6;
+    this.realY = 0;
+    this.imgX = 0;
+    this.imgY = 0.8;
+    this.realMagnitude = this.calculateRealMagnitude();
+    this.imgMagnitude = this.calculateImaginaryMagnitude();
 
     this.realXSlider.setValue(this.realX);
     this.realYSlider.setValue(this.realY);
@@ -830,6 +831,8 @@ class UnitCircle {
 
   // unit circle (real = 1 and img = 0, or vice versa)
   drawUnitCircle () {
+    if (!this.showUnitCircle) return;
+
     if (this.renderAsComplexCircle) {
       if (this.isUnitary()) {
         this.p.stroke(this.unitCircleColor);
