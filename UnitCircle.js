@@ -35,6 +35,14 @@
     - right click?
     - press hold?
 
+  - Might want a way to automatically jump to "standard" states
+    - ∣0⟩
+    - ∣1⟩
+    - ∣+⟩  : realX = sqrt(1/2), realY = sqrt(1/2)  ?
+    - ∣-⟩  : realX = sqrt(1/2), realY = -sqrt(1/2)  ?
+    - ∣i⟩  : realX = sqrt(1/2), imgY = sqrt(1/2)  ?
+    - ∣-i⟩ : realX = sqrt(1/2), imgY = -sqrt(1/2)  ?
+
   - Event handling
     - who will dispatch to instances?
       - ex. is there a "global" entity that will receive event
@@ -552,11 +560,15 @@ class UnitCircle {
 
       // calculate magnitudes
       let realMagnitudeSquared = this.p.sq(this.realX) + this.p.sq(this.realY);
+      this.realMagnitude = this.p.sqrt(realMagnitudeSquared);
       if (realMagnitudeSquared > 1) {
+        /* TODO
+           Ryan pointed out that can get sqrt of negative as an imaginary number...
+           Should we use this?
+        */
         console.log("abort, negative sqrt");
         return;
       }
-      this.realMagnitude = this.p.sqrt(realMagnitudeSquared);
       this.imgMagnitude = this.p.sqrt(1 - realMagnitudeSquared);
 
       // get current angle
@@ -580,11 +592,11 @@ class UnitCircle {
 
       // calculate magnitudes
       let imgMagnitudeSquared = this.p.sq(this.imgX) + this.p.sq(this.imgY);
+      this.imgMagnitude = this.p.sqrt(imgMagnitudeSquared);
       if (imgMagnitudeSquared > 1) {
         console.log("abort, negative sqrt");
         return;
       }
-      this.imgMagnitude = this.p.sqrt(imgMagnitudeSquared);
       this.realMagnitude = this.p.sqrt(1 - imgMagnitudeSquared);
 
       // get current angle
