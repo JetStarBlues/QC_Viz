@@ -100,7 +100,7 @@ let sketch = function (p) {
 
   // ----------------------------------------------
 
-  initializeCheckboxes = function () {
+  let initializeCheckboxes = function () {
     //
     c.showLabel = true;
 
@@ -151,7 +151,7 @@ let sketch = function (p) {
     layoutCheckboxes();
   }
 
-  layoutCheckboxes = function () {
+  let layoutCheckboxes = function () {
     // label
     let labelControlsContainer = p.createDiv();
     let labelControlsLabel = p.createDiv("Label");
@@ -197,7 +197,7 @@ let sketch = function (p) {
 
   // ----------------------------------------------
 
-  changedHandler_showLabelCheckbox = function () {
+  let changedHandler_showLabelCheckbox = function () {
     if (this.checked()) {
       c.showLabel = true;
     }
@@ -208,7 +208,7 @@ let sketch = function (p) {
     p.loop();
   }
 
-  changedHandler_showGridCheckbox = function (noLoop) {
+  let changedHandler_showGridCheckbox = function (noLoop) {
     if (showGridCheckbox.checked()) {
       showGrid = true;
 
@@ -226,7 +226,7 @@ let sketch = function (p) {
     p.loop();
   }
 
-  changedHandler_showAxisProjectionsCheckbox = function () {
+  let changedHandler_showAxisProjectionsCheckbox = function () {
     if (this.checked()) {
       c.showAxisProjections = true;
     }
@@ -240,7 +240,7 @@ let sketch = function (p) {
 
   // ----------------------------------------------
 
-  drawGrid = function () {
+  let drawGrid = function () {
     let gridColor = colors["pal1col2"];
 
     p.strokeWeight(1);
