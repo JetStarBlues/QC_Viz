@@ -338,22 +338,30 @@ class UnitCircle {
   setFromKet (ket) {
     this.realX = ket[0].re;
     this.imgX = ket[0].im;
-    this.realX = ket[1].re;
-    this.imgX = ket[1].im;
+    this.realY = ket[1].re;
+    this.imgY = ket[1].im;
 
     // TODO, call `updateValuesUsingKet` here?
+    this.updateValuesUsingKet();
   }
 
 
   // ----------------------------------------------
 
-  // TODO, move `this.realMagnitude` assignment to inside function ??
   calculateRealMagnitude () {
     return this.p.sqrt(this.p.sq(this.realX) + this.p.sq(this.realY));
   }
 
   calculateImaginaryMagnitude () {
     return this.p.sqrt(this.p.sq(this.imgX) + this.p.sq(this.imgY));
+  }
+
+  calculateRealMagnitudeSquared () {
+    return this.p.sq(this.realX) + this.p.sq(this.realY);
+  }
+
+  calculateImaginaryMagnitudeSquared () {
+    return this.p.sq(this.imgX) + this.p.sq(this.imgY);
   }
 
 

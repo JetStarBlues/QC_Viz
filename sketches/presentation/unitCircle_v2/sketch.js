@@ -44,6 +44,11 @@ let sketch = function (p) {
     cy = p.height * 0.4;
     c.setCenter(cx, cy);
 
+    // Set interesting initial value
+    c.setFromKet([
+      math.complex(0.6, 0),
+      math.complex(0, 0.8)
+    ]);
 
     // Initialize checkboxes
     initializeCheckboxes();
@@ -55,6 +60,23 @@ let sketch = function (p) {
     if (showGrid) drawGrid();
 
     c.render();
+
+    /* It might be bewildering why normalizedCheck sometimes shows 1 ≠ 1
+       This happens because of rounding in the displayed values.
+       If the full float is shown, it becomes clear the two
+       are not equivalent.
+       Uncomment below to see the full values in the console.
+    */
+    /*
+    console.log(`real𝛼: ${c.realX}`);
+    console.log(`img𝛼: ${c.imgX}`);
+    console.log(`real𝛽: ${c.realY}`);
+    console.log(`img𝛽: ${c.imgY}`);
+    console.log(`real𝛼² + img𝛼² + real𝛽² + img𝛽² = ${
+      c.calculateRealMagnitudeSquared() +
+      c.calculateImaginaryMagnitudeSquared()
+    }`);
+    */
 
     p.noLoop();
   }
