@@ -1,3 +1,8 @@
+/*
+  Notes:
+    - Anything using `elt` is undocumented behaviour
+*/
+
 let c;
 
 let sketch = function (p) {
@@ -11,10 +16,20 @@ let sketch = function (p) {
   let cx;
   let cy;
 
+  //
+  let showGrid;
+
   // checkboxes
+  let showLabelCheckbox;
+  let showComplexLabelCheckbox;
   let showNormalizedCheckCheckbox;
-
-
+  let renderAsComplexCircleCheckbox;
+  let showImaginaryCircleCheckbox;
+  let showUnitCircleCheckbox;
+  let showGridCheckbox;
+  let showAxisProjectionsCheckbox;
+  let showSlidersCheckbox;
+  let autoNormalizeSlidersCheckbox;
 
 
   // ----------------------------------------------
@@ -39,7 +54,7 @@ let sketch = function (p) {
   p.draw = function () {
     p.background(colors["pal1col0"]);
 
-    drawGrid();
+    if (showGrid) drawGrid();
 
     c.render();
 
@@ -84,12 +99,31 @@ let sketch = function (p) {
   // ----------------------------------------------
 
   initializeCheckboxes = function () {
-    /* TODO
-       - add container div and style with flex
-       - figure out basic label styling
-    */
+    //
+    c.showLabel = true;
 
-    // Lets start with this enabled
+    showLabelCheckbox = p.createCheckbox(
+      "show label",
+      c.showLabel
+    );
+
+    showLabelCheckbox.changed(
+      changedHandler_showLabelCheckbox
+    );
+
+    // TODO, fancy, only enabled if showLabel
+    c.showComplexLabel = true;
+
+    showComplexLabelCheckbox = p.createCheckbox(
+      "show complex label",
+      c.showComplexLabel
+    );
+
+    showComplexLabelCheckbox.changed(
+      changedHandler_showComplexLabelCheckbox
+    );
+
+    // TODO, fancy, only enabled if showComplexLabel
     c.showNormalizedCheck = true;
 
     showNormalizedCheckCheckbox = p.createCheckbox(
@@ -101,24 +135,280 @@ let sketch = function (p) {
       changedHandler_showNormalizedCheckCheckbox
     );
 
+    //
+    c.renderAsComplexCircle = true;
 
+    renderAsComplexCircleCheckbox = p.createCheckbox(
+      "show complex circle",
+      c.renderAsComplexCircle
+    );
+
+    renderAsComplexCircleCheckbox.changed(
+      changedHandler_renderAsComplexCircleCheckbox
+    );
+
+    // TODO, fancy, only enabled if renderAsComplexCircle
+    c.showImaginaryCircle = true;
+
+    showImaginaryCircleCheckbox = p.createCheckbox(
+      "show imaginary circle",
+      c.showImaginaryCircle
+    );
+
+    showImaginaryCircleCheckbox.changed(
+      changedHandler_showImaginaryCircleCheckbox
+    );
+
+    // TODO, fancy, only enabled if renderAsComplexCircle
+    c.showUnitCircle = true;
+
+    showUnitCircleCheckbox = p.createCheckbox(
+      "show unit circle",
+      c.showUnitCircle
+    );
+
+    showUnitCircleCheckbox.changed(
+      changedHandler_showUnitCircleCheckbox
+    );
+
+    //
+    showGrid = false;
+
+    showGridCheckbox = p.createCheckbox(
+      "show grid",
+      showGrid
+    );
+
+    showGridCheckbox.changed(
+      changedHandler_showGridCheckbox
+    );
+
+    // TODO, fancy, only enabled if renderAsComplexCircle
+    c.showAxisProjections = false;
+
+    showAxisProjectionsCheckbox = p.createCheckbox(
+      "show axis projections",
+      c.showAxisProjections
+    );
+
+    showAxisProjectionsCheckbox.changed(
+      changedHandler_showAxisProjectionsCheckbox
+    );
+
+    //
+    c.showSliders = true;
+
+    showSlidersCheckbox = p.createCheckbox(
+      "show sliders",
+      c.showSliders
+    );
+
+    showSlidersCheckbox.changed(
+      changedHandler_showSlidersCheckbox
+    );
+
+    // TODO, fancy, only enabled if showSliders
+    c.autoNormalizeSliders = false;
+
+    autoNormalizeSlidersCheckbox = p.createCheckbox(
+      "auto normalize sliders",
+      c.autoNormalizeSliders
+    );
+
+    autoNormalizeSlidersCheckbox.changed(
+      changedHandler_autoNormalizeSlidersCheckbox
+    );
+
+    //
+    layoutCheckboxes();
   }
+
+  layoutCheckboxes = function () {
+    // label
+    let labelControlsContainer = p.createDiv();
+    let labelControlsLabel = p.createDiv("Label");
+    labelControlsContainer.elt.appendChild(labelControlsLabel.elt);
+    labelControlsContainer.elt.appendChild(showLabelCheckbox.elt);
+    labelControlsContainer.elt.appendChild(showComplexLabelCheckbox.elt);
+    labelControlsContainer.elt.appendChild(showNormalizedCheckCheckbox.elt);
+
+    // circles
+    let circleControlsContainer = p.createDiv();
+    let circleControlsLabel = p.createDiv("Circles");
+    circleControlsContainer.elt.appendChild(circleControlsLabel.elt);
+    circleControlsContainer.elt.appendChild(renderAsComplexCircleCheckbox.elt);
+    circleControlsContainer.elt.appendChild(showImaginaryCircleCheckbox.elt);
+    circleControlsContainer.elt.appendChild(showUnitCircleCheckbox.elt);
+
+    // grid
+    let gridControlsContainer = p.createDiv();
+    let gridControlsLabel = p.createDiv("Grid");
+    gridControlsContainer.elt.appendChild(gridControlsLabel.elt);
+    gridControlsContainer.elt.appendChild(showGridCheckbox.elt);
+    gridControlsContainer.elt.appendChild(showAxisProjectionsCheckbox.elt);
+
+    // sliders
+    let sliderControlsContainer = p.createDiv();
+    let sliderControlsLabel = p.createDiv("Sliders");
+    sliderControlsContainer.elt.appendChild(sliderControlsLabel.elt);
+    sliderControlsContainer.elt.appendChild(showSlidersCheckbox.elt);
+    sliderControlsContainer.elt.appendChild(autoNormalizeSlidersCheckbox.elt);
+
+    //
+    let checkboxesContainer = p.createDiv();
+    checkboxesContainer.elt.appendChild(labelControlsContainer.elt);
+    checkboxesContainer.elt.appendChild(circleControlsContainer.elt);
+    checkboxesContainer.elt.appendChild(gridControlsContainer.elt);
+    checkboxesContainer.elt.appendChild(sliderControlsContainer.elt);
+
+
+    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+    // checkboxesContainer.style("border", "2px solid blue");
+    checkboxesContainer.style("background", "rgb(198,214,184)");
+    checkboxesContainer.style("font-family", "monospace");
+    checkboxesContainer.style("font-size", "12px");
+    checkboxesContainer.style("display", "flex");
+    checkboxesContainer.style("flex-wrap", "wrap");
+    checkboxesContainer.style("flex-direction", "row");
+    checkboxesContainer.style("justify-content", "center");
+    checkboxesContainer.style("padding", "10px 5px");
+
+
+    // labelControlsContainer.style("border", "1px solid green");
+    // circleControlsContainer.style("border", "1px solid green");
+    // gridControlsContainer.style("border", "1px solid green");
+    // sliderControlsContainer.style("border", "1px solid green");
+
+    labelControlsContainer.style("flex-grow", "1");
+    circleControlsContainer.style("flex-grow", "1");
+    gridControlsContainer.style("flex-grow", "1");
+    sliderControlsContainer.style("flex-grow", "1");
+
+    labelControlsContainer.style("padding", "5px");
+    circleControlsContainer.style("padding", "5px");
+    gridControlsContainer.style("padding", "5px");
+    sliderControlsContainer.style("padding", "5px");
+
+
+    labelControlsLabel.style("font-weight", "bold");
+    circleControlsLabel.style("font-weight", "bold");
+    gridControlsLabel.style("font-weight", "bold");
+    sliderControlsLabel.style("font-weight", "bold");
+  }
+
 
   // ----------------------------------------------
 
-  changedHandler_showNormalizedCheckCheckbox = function () {
+  changedHandler_showLabelCheckbox = function () {
     if (this.checked()) {
-      c.showNormalizedCheck = true;
-      console.log("true");
+      c.showLabel = true;
     }
     else {
-      c.showNormalizedCheck = false;
-      console.log("false");
+      c.showLabel = false;
     }
 
     p.loop();
   }
 
+  changedHandler_showComplexLabelCheckbox = function () {
+    if (this.checked()) {
+      c.showComplexLabel = true;
+    }
+    else {
+      c.showComplexLabel = false;
+    }
+
+    p.loop();
+  }
+
+  changedHandler_showNormalizedCheckCheckbox = function () {
+    if (this.checked()) {
+      c.showNormalizedCheck = true;
+    }
+    else {
+      c.showNormalizedCheck = false;
+    }
+
+    p.loop();
+  }
+
+  changedHandler_renderAsComplexCircleCheckbox = function () {
+    if (this.checked()) {
+      c.renderAsComplexCircle = true;
+    }
+    else {
+      c.renderAsComplexCircle = false;
+    }
+
+    p.loop();
+  }
+
+  changedHandler_showImaginaryCircleCheckbox = function () {
+    if (this.checked()) {
+      c.showImaginaryCircle = true;
+    }
+    else {
+      c.showImaginaryCircle = false;
+    }
+
+    p.loop();
+  }
+
+  changedHandler_showUnitCircleCheckbox = function () {
+    if (this.checked()) {
+      c.showUnitCircle = true;
+    }
+    else {
+      c.showUnitCircle = false;
+    }
+
+    p.loop();
+  }
+
+  changedHandler_showGridCheckbox = function () {
+    if (this.checked()) {
+      showGrid = true;
+    }
+    else {
+      showGrid = false;
+    }
+
+    p.loop();
+  }
+
+  changedHandler_showAxisProjectionsCheckbox = function () {
+    if (this.checked()) {
+      c.showAxisProjections = true;
+    }
+    else {
+      c.showAxisProjections = false;
+    }
+
+    p.loop();
+  }
+
+  changedHandler_showSlidersCheckbox = function () {
+    if (this.checked()) {
+      c.showSliders = true;
+    }
+    else {
+      c.showSliders = false;
+    }
+
+    p.loop();
+  }
+
+  changedHandler_autoNormalizeSlidersCheckbox = function () {
+    if (this.checked()) {
+      c.enableAutoNormalizeSliders();
+    }
+    else {
+      c.disableAutoNormalizeSliders();
+    }
+
+    p.loop();
+  }
 
 
   // ----------------------------------------------
