@@ -1,5 +1,5 @@
 /*
-  Notes:
+  Note:
     - Anything using `elt` is undocumented behaviour
 */
 
@@ -35,8 +35,6 @@ let sketch = function (p) {
   // ----------------------------------------------
 
   p.setup = function () {
-    // p.createCanvas(800, 500);
-    // p.createCanvas(canvasMinWidth, canvasHeight);
     p.createCanvas(p.max(canvasMinWidth, p.windowWidth), canvasHeight);
 
     // Initialize unit circle
@@ -111,7 +109,7 @@ let sketch = function (p) {
       changedHandler_showLabelCheckbox
     );
 
-    // TODO, fancy, only enabled if showLabel
+    //
     c.showComplexLabel = true;
 
     showComplexLabelCheckbox = p.createCheckbox(
@@ -123,7 +121,7 @@ let sketch = function (p) {
       changedHandler_showComplexLabelCheckbox
     );
 
-    // TODO, fancy, only enabled if showComplexLabel
+    //
     c.showNormalizedCheck = true;
 
     showNormalizedCheckCheckbox = p.createCheckbox(
@@ -147,7 +145,7 @@ let sketch = function (p) {
       changedHandler_renderAsComplexCircleCheckbox
     );
 
-    // TODO, fancy, only enabled if renderAsComplexCircle
+    //
     c.showImaginaryCircle = true;
 
     showImaginaryCircleCheckbox = p.createCheckbox(
@@ -159,7 +157,7 @@ let sketch = function (p) {
       changedHandler_showImaginaryCircleCheckbox
     );
 
-    // TODO, fancy, only enabled if renderAsComplexCircle
+    //
     c.showUnitCircle = true;
 
     showUnitCircleCheckbox = p.createCheckbox(
@@ -183,7 +181,7 @@ let sketch = function (p) {
       changedHandler_showGridCheckbox
     );
 
-    // TODO, fancy, only enabled if renderAsComplexCircle
+    //
     c.showAxisProjections = false;
 
     showAxisProjectionsCheckbox = p.createCheckbox(
@@ -207,7 +205,7 @@ let sketch = function (p) {
       changedHandler_showSlidersCheckbox
     );
 
-    // TODO, fancy, only enabled if showSliders
+    //
     c.autoNormalizeSliders = false;
 
     autoNormalizeSlidersCheckbox = p.createCheckbox(
@@ -219,7 +217,20 @@ let sketch = function (p) {
       changedHandler_autoNormalizeSlidersCheckbox
     );
 
-    //
+
+    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+    /* Call to en/disable dependent checkboxes
+       using inital checkbox state
+    */
+    changedHandler_showLabelCheckbox(true);
+    changedHandler_renderAsComplexCircleCheckbox(true);
+    changedHandler_showGridCheckbox(true);
+    changedHandler_showSlidersCheckbox(true);
+
+
+    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
     layoutCheckboxes();
   }
 
@@ -264,7 +275,6 @@ let sketch = function (p) {
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
-    // checkboxesContainer.style("border", "2px solid blue");
     checkboxesContainer.style("background", "rgb(198,214,184)");
     checkboxesContainer.style("font-family", "monospace");
     checkboxesContainer.style("font-size", "12px");
@@ -274,11 +284,6 @@ let sketch = function (p) {
     checkboxesContainer.style("justify-content", "center");
     checkboxesContainer.style("padding", "10px 5px");
 
-
-    // labelControlsContainer.style("border", "1px solid green");
-    // circleControlsContainer.style("border", "1px solid green");
-    // gridControlsContainer.style("border", "1px solid green");
-    // sliderControlsContainer.style("border", "1px solid green");
 
     labelControlsContainer.style("flex-grow", "1");
     circleControlsContainer.style("flex-grow", "1");
@@ -300,14 +305,23 @@ let sketch = function (p) {
 
   // ----------------------------------------------
 
-  changedHandler_showLabelCheckbox = function () {
-    if (this.checked()) {
+  changedHandler_showLabelCheckbox = function (noLoop) {
+    if (showLabelCheckbox.checked()) {
       c.showLabel = true;
+
+      // Enable dependent checkboxes
+      showComplexLabelCheckbox.elt.children[0].disabled = false;
+      showNormalizedCheckCheckbox.elt.children[0].disabled = false;
     }
     else {
       c.showLabel = false;
+
+      // Disable dependent checkboxes
+      showComplexLabelCheckbox.elt.children[0].disabled = true;
+      showNormalizedCheckCheckbox.elt.children[0].disabled = true;
     }
 
+    if (noLoop === true) return;
     p.loop();
   }
 
@@ -333,14 +347,23 @@ let sketch = function (p) {
     p.loop();
   }
 
-  changedHandler_renderAsComplexCircleCheckbox = function () {
-    if (this.checked()) {
+  changedHandler_renderAsComplexCircleCheckbox = function (noLoop) {
+    if (renderAsComplexCircleCheckbox.checked()) {
       c.renderAsComplexCircle = true;
+
+      // Enable dependent checkboxes
+      showImaginaryCircleCheckbox.elt.children[0].disabled = false;
+      showUnitCircleCheckbox.elt.children[0].disabled = false;
     }
     else {
       c.renderAsComplexCircle = false;
+
+      // Disable dependent checkboxes
+      showImaginaryCircleCheckbox.elt.children[0].disabled = true;
+      showUnitCircleCheckbox.elt.children[0].disabled = true;
     }
 
+    if (noLoop === true) return;
     p.loop();
   }
 
@@ -366,14 +389,21 @@ let sketch = function (p) {
     p.loop();
   }
 
-  changedHandler_showGridCheckbox = function () {
-    if (this.checked()) {
+  changedHandler_showGridCheckbox = function (noLoop) {
+    if (showGridCheckbox.checked()) {
       showGrid = true;
+
+      // Enable dependent checkboxes
+      showAxisProjectionsCheckbox.elt.children[0].disabled = false;
     }
     else {
       showGrid = false;
+
+      // Disable dependent checkboxes
+      showAxisProjectionsCheckbox.elt.children[0].disabled = true;
     }
 
+    if (noLoop === true) return;
     p.loop();
   }
 
@@ -388,14 +418,21 @@ let sketch = function (p) {
     p.loop();
   }
 
-  changedHandler_showSlidersCheckbox = function () {
-    if (this.checked()) {
+  changedHandler_showSlidersCheckbox = function (noLoop) {
+    if (showSlidersCheckbox.checked()) {
       c.showSliders = true;
+
+      // Enable dependent checkboxes
+      autoNormalizeSlidersCheckbox.elt.children[0].disabled = false;
     }
     else {
       c.showSliders = false;
+
+      // Disable dependent checkboxes
+      autoNormalizeSlidersCheckbox.elt.children[0].disabled = true;
     }
 
+    if (noLoop === true) return;
     p.loop();
   }
 
