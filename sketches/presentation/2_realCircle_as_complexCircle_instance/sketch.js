@@ -183,15 +183,19 @@ let sketch = function (p) {
     checkboxesContainer.style("padding", "10px 5px");
 
 
-    labelControlsContainer.style("flex-grow", "1");
-    gridControlsContainer.style("flex-grow", "1");
+    const controlsContainerStyle = `
+      flex-grow: 1;
+      padding: 5px;
+    `;
+    labelControlsContainer.attribute("style", controlsContainerStyle);
+    gridControlsContainer.attribute("style", controlsContainerStyle);
 
-    labelControlsContainer.style("padding", "5px");
-    gridControlsContainer.style("padding", "5px");
 
-
-    labelControlsLabel.style("font-weight", "bold");
-    gridControlsLabel.style("font-weight", "bold");
+    const controlsLabelStyle = `
+      font-weight: bold
+    `;
+    labelControlsLabel.attribute("style", controlsLabelStyle);
+    gridControlsLabel.attribute("style", controlsLabelStyle);
   }
 
 

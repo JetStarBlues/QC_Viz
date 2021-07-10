@@ -307,21 +307,23 @@ let sketch = function (p) {
     checkboxesContainer.style("padding", "10px 5px");
 
 
-    labelControlsContainer.style("flex-grow", "1");
-    circleControlsContainer.style("flex-grow", "1");
-    gridControlsContainer.style("flex-grow", "1");
-    sliderControlsContainer.style("flex-grow", "1");
+    const controlsContainerStyle = `
+      flex-grow: 1;
+      padding: 5px;
+    `;
+    labelControlsContainer.attribute("style", controlsContainerStyle);
+    circleControlsContainer.attribute("style", controlsContainerStyle);
+    gridControlsContainer.attribute("style", controlsContainerStyle);
+    sliderControlsContainer.attribute("style", controlsContainerStyle);
 
-    labelControlsContainer.style("padding", "5px");
-    circleControlsContainer.style("padding", "5px");
-    gridControlsContainer.style("padding", "5px");
-    sliderControlsContainer.style("padding", "5px");
 
-
-    labelControlsLabel.style("font-weight", "bold");
-    circleControlsLabel.style("font-weight", "bold");
-    gridControlsLabel.style("font-weight", "bold");
-    sliderControlsLabel.style("font-weight", "bold");
+    const controlsLabelStyle = `
+      font-weight: bold
+    `;
+    labelControlsLabel.attribute("style", controlsLabelStyle);
+    circleControlsLabel.attribute("style", controlsLabelStyle);
+    gridControlsLabel.attribute("style", controlsLabelStyle);
+    sliderControlsLabel.attribute("style", controlsLabelStyle);
   }
 
 
