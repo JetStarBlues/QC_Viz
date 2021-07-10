@@ -9,7 +9,7 @@ let sketch = function (p) {
 
   // canvas dimensions
   let canvasMinWidth = 640;
-  let canvasHeight = 500;
+  let canvasHeight = 430;
 
   // unit circle parameters
   // let c;
@@ -34,7 +34,7 @@ let sketch = function (p) {
     c = new UnitCircle(p);
 
     cx = p.width / 2;
-    cy = p.height * 0.4;
+    cy = p.height / 2;
     c.setCenter(cx, cy);
 
     // Set interesting initial value
