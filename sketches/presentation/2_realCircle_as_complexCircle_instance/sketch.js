@@ -181,7 +181,7 @@ let sketch = function (p) {
     canvas.style("display", "block");
 
 
-    checkboxesContainerStyle = `
+    const checkboxesContainerStyle = `
       background: rgb(198,214,184);
       font-family: monospace;
       font-size: 12px;
