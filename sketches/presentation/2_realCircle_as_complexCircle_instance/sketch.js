@@ -90,7 +90,7 @@ let sketch = function (p) {
        that are not set within draw loop.
     */
     cx = p.width / 2;
-    cy = p.height * 0.4;
+    cy = p.height / 2;
     c.setCenter(cx, cy);
 
     //
