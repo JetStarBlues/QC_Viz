@@ -31,7 +31,8 @@ let sketch = function (p) {
   // ----------------------------------------------
 
   p.setup = function () {
-    canvas = p.createCanvas(p.max(canvasMinWidth, p.windowWidth), canvasHeight);
+    // canvas = p.createCanvas(p.max(canvasMinWidth, p.windowWidth), canvasHeight);
+    canvas = p.createCanvas(p.windowWidth, canvasHeight);
 
     // Initialize unit circle
     c = new UnitCircle(p);
@@ -87,7 +88,8 @@ let sketch = function (p) {
   }
 
   p.windowResized = function () {
-    p.resizeCanvas(p.max(canvasMinWidth, p.windowWidth), canvasHeight, true);
+    // p.resizeCanvas(p.max(canvasMinWidth, p.windowWidth), canvasHeight, true);
+    p.resizeCanvas(p.windowWidth, canvasHeight, true);
 
     /* Update variables dependent on canvas size,
        that are not set within draw loop.
