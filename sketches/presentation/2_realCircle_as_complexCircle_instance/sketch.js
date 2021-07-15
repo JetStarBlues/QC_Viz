@@ -7,6 +7,9 @@ let c;
 
 let sketch = function (p) {
 
+  //
+  let canvas;
+
   // canvas dimensions
   let canvasMinWidth = 640;
   let canvasHeight = 430;
@@ -28,7 +31,7 @@ let sketch = function (p) {
   // ----------------------------------------------
 
   p.setup = function () {
-    p.createCanvas(p.max(canvasMinWidth, p.windowWidth), canvasHeight);
+    canvas = p.createCanvas(p.max(canvasMinWidth, p.windowWidth), canvasHeight);
 
     // Initialize unit circle
     c = new UnitCircle(p);
@@ -173,14 +176,21 @@ let sketch = function (p) {
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
-    checkboxesContainer.style("background", "rgb(198,214,184)");
-    checkboxesContainer.style("font-family", "monospace");
-    checkboxesContainer.style("font-size", "12px");
-    checkboxesContainer.style("display", "flex");
-    checkboxesContainer.style("flex-wrap", "wrap");
-    checkboxesContainer.style("flex-direction", "row");
-    checkboxesContainer.style("justify-content", "center");
-    checkboxesContainer.style("padding", "10px 5px");
+    canvas.style("display", "block");
+
+
+    checkboxesContainerStyle = `
+      background: rgb(198,214,184);
+      font-family: monospace;
+      font-size: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      flex-direction: row;
+      justify-content: center;
+      padding: 10px 5px;
+      line-height: 1em;
+    `;
+    checkboxesContainer.attribute("style", checkboxesContainerStyle);
 
 
     const controlsContainerStyle = `
@@ -192,10 +202,27 @@ let sketch = function (p) {
 
 
     const controlsLabelStyle = `
-      font-weight: bold
+      font-weight: bold;
     `;
     labelControlsLabel.attribute("style", controlsLabelStyle);
     gridControlsLabel.attribute("style", controlsLabelStyle);
+
+
+    const checkboxContainerStyle = `
+      display: flex;
+      align-items: center;
+    `;
+    showLabelCheckbox.elt.setAttribute("style", checkboxContainerStyle);
+    showGridCheckbox.elt.setAttribute("style", checkboxContainerStyle);
+    showAxisProjectionsCheckbox.elt.setAttribute("style", checkboxContainerStyle);
+
+
+    const checkboxStyle = `
+      margin-left: 1px;
+    `;
+    showLabelCheckbox.elt.getElementsByTagName("input")[0].setAttribute("style", checkboxStyle);
+    showGridCheckbox.elt.getElementsByTagName("input")[0].setAttribute("style", checkboxStyle);
+    showAxisProjectionsCheckbox.elt.getElementsByTagName("input")[0].setAttribute("style", checkboxStyle);
   }
 
 
