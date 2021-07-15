@@ -32,7 +32,8 @@ function* p5Helper(sketch) {
     while (true) {
       yield element;
     }
-  } finally {
+  }
+  finally {
     instance.remove();
   }
 }
@@ -47,7 +48,6 @@ p5Helper(function (p) {
 ```
 
 
----
 
 # Setting the width of the canvas
 
