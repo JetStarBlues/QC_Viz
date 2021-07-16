@@ -9,6 +9,7 @@ let sketch = function (p) {
 
   //
   let canvas;
+  let canvasParent;
 
   // canvas dimensions
   let canvasMinWidth = 640;
@@ -31,8 +32,10 @@ let sketch = function (p) {
   // ----------------------------------------------
 
   p.setup = function () {
-    // canvas = p.createCanvas(p.max(canvasMinWidth, p.windowWidth), canvasHeight);
-    canvas = p.createCanvas(p.windowWidth, canvasHeight);
+    // Trick to responsively size canvas
+    canvas = p.createCanvas(0, 0);
+    canvasParent = canvas.elt.parentNode;
+    p.resizeCanvas(canvasParent.clientWidth, canvasHeight, true);
 
     // Initialize unit circle
     c = new UnitCircle(p);
@@ -88,8 +91,8 @@ let sketch = function (p) {
   }
 
   p.windowResized = function () {
-    // p.resizeCanvas(p.max(canvasMinWidth, p.windowWidth), canvasHeight, true);
-    p.resizeCanvas(p.windowWidth, canvasHeight, true);
+    // Trick to responsively size canvas
+    p.resizeCanvas(canvasParent.clientWidth, canvasHeight, true);
 
     /* Update variables dependent on canvas size,
        that are not set within draw loop.
