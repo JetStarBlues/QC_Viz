@@ -107,6 +107,24 @@ let sketch = function (p) {
     c.mouseDraggedHandler();
     p.loop();
   }
+  p.touchStarted = function () {
+    console.log(`touchStarted (${p.mouseX}, ${p.mouseY})`);
+    c.touchStartedHandler();
+    p.loop();
+  }
+  p.touchEnded = function () {
+    console.log("touchEnded");
+    c.touchEndedHandler();
+    p.loop();
+  }
+  p.touchMoved = function () {
+    console.log(`touchMoved (${p.mouseX}, ${p.mouseY})`);
+    c.touchMovedHandler();
+    p.loop();
+
+    // Prevent default behaviour of scrolling page
+    return false;
+  }
 
   p.windowResized = function () {
     // Trick to responsively size canvas

@@ -834,6 +834,28 @@ class UnitCircle {
     this.mouseDraggedHandler_sliders();
   }
 
+  /* TODO
+     Currently, it is up to UnitClass to propogate
+     touch event to its children sliders.
+     Is this good practice?
+  */
+  touchStartedHandler () {
+    /* Since no hover equivalent in touch, call movedHandler
+       to determine whether touch is on point.
+    */
+    this.mouseMovedHandler();
+
+    this.mousePressedHandler();
+  }
+
+  touchEndedHandler () {
+    this.mouseReleasedHandler();
+  }
+
+  touchMovedHandler () {
+    this.mouseDraggedHandler();
+  }
+
 
   // ----------------------------------------------
 
