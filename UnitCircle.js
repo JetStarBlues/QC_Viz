@@ -859,6 +859,23 @@ class UnitCircle {
 
   // ----------------------------------------------
 
+  userHasChangedValue () {
+    return (
+      // value possibly changed with a point
+      this.pointIsSelected ||
+      this.imgPointIsSelected ||
+
+      // value possibly changed with a slider
+      this.realXSlider.knobIsSelected ||
+      this.imgXSlider.knobIsSelected ||
+      this.realYSlider.knobIsSelected ||
+      this.imgYSlider.knobIsSelected
+    );
+  }
+
+
+  // ----------------------------------------------
+
   // unit circle (real = 1 and img = 0, or vice versa)
   drawUnitCircle () {
     if (!this.showUnitCircle) return;
