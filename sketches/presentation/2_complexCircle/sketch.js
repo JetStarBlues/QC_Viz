@@ -44,6 +44,20 @@ let sketch = function (p) {
     canvasParent = canvas.elt.parentNode;
     p.resizeCanvas(canvasParent.clientWidth, canvasHeight, true);
 
+    // TODO
+    /* Limit scope of as many events as possible to canvas.
+       Unsupported:
+         - mouseDragged
+           - https://github.com/processing/p5.js/issues/1967
+    */
+
+    /* Disable default scrolling behaviour on touchMoved (drag)
+       that occurs within canvas.
+       Not sure why this behaviour is controlled by CSS.
+       https://stackoverflow.com/a/43275544
+    */
+    canvas.style("touch-action", "none");
+
     // Initialize unit circle
     c = new UnitCircle(p);
 
@@ -108,22 +122,16 @@ let sketch = function (p) {
     p.loop();
   }
   p.touchStarted = function () {
-    console.log(`touchStarted (${p.mouseX}, ${p.mouseY})`);
     c.touchStartedHandler();
     p.loop();
   }
   p.touchEnded = function () {
-    console.log("touchEnded");
     c.touchEndedHandler();
     p.loop();
   }
   p.touchMoved = function () {
-    console.log(`touchMoved (${p.mouseX}, ${p.mouseY})`);
     c.touchMovedHandler();
     p.loop();
-
-    // Prevent default behaviour of scrolling page
-    return false;
   }
 
   p.windowResized = function () {
