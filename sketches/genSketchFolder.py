@@ -14,6 +14,9 @@ indexContent = """<!DOCTYPE html>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/5.0.0/math.min.js"></script>
 
     <script src="../../../helperFunctions.js"></script>
+    <script src="../../../colors.js"></script>
+    <script src="../../../Slider.js"></script>
+    <script src="../../../UnitCircle.js"></script>
 
     <meta charset="utf-8" />
 
