@@ -10,7 +10,7 @@
 */
 
 QCircuit
-  = qubits:Qubits { return qubits }
+  = "\n"* qubits:Qubits { return qubits }
 
 Qubits
   = head:Qubit "\n"* rest:Qubits? { return [head, ...(rest ? rest : [])] }
